@@ -469,11 +469,18 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
+/* Identitas pengembang */
+.dev-card{margin-top:12px;padding:16px;border-radius:18px;background:linear-gradient(135deg,#F3EEFF,#E9F7FC);display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.dev-label{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.dev-name{font-family:var(--font-display);font-weight:600;font-size:26px;color:var(--primary)}
+.dev-wa{font-weight:700;color:var(--ink-2);font-size:15px;margin-bottom:8px}
+.dev-card .btn{text-decoration:none}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.0.0 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.0.1 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -510,7 +517,9 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.0.0',
+  version: '1.0.1',
+  // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
+  developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,
   // atau mematikannya di Area Orang Tua → Sekolah.
   school: {
@@ -2237,6 +2246,12 @@ const Parent = (() => {
 
       <section class="p-card"><h2><span class="ico">ℹ️</span>Tentang TIQO</h2>
         <p>TIQO — ${esc(TIQO_CONFIG.tagline)}. Versi ${TIQO_CONFIG.version}.<br>Tanpa iklan, tanpa pembelian, tanpa chat.</p>
+        <div class="dev-card">
+          <span class="dev-label">Dikembangkan oleh</span>
+          <b class="dev-name">${esc(TIQO_CONFIG.developer.name)}</b>
+          <span class="dev-wa">WhatsApp: ${esc(TIQO_CONFIG.developer.wa)}</span>
+          <a class="btn btn-ok btn-sm" href="https://wa.me/${TIQO_CONFIG.developer.wa.replace(/\D/g, '').replace(/^0/, '62')}?text=${encodeURIComponent('Halo tim ' + TIQO_CONFIG.developer.name + ', saya ingin bertanya tentang aplikasi TIQO.')}" target="_blank" rel="noopener">Hubungi Tim ${esc(TIQO_CONFIG.developer.name)}</a>
+        </div>
         <div class="install-slot"></div>
       </section>
     </main>`);
