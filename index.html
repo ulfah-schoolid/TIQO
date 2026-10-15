@@ -188,11 +188,11 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
   background:var(--tile-bg);color:var(--ink);border:2px solid var(--tile-edge)}
 .mission .mid{flex:1;min-width:0}
 .mission .mid b{display:block;font-family:var(--font-display);font-weight:600;font-size:18px;line-height:1.2}
-.mission .mid span{display:block;font-size:14px;color:var(--ink-2);font-weight:600;margin-top:2px}
+.mission .mid > span:not(.meta){display:block;font-size:14px;color:var(--ink-2);font-weight:600;margin-top:2px}
 .mission .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--lilac);color:var(--ink-2)}
+.chip{white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--lilac);color:var(--ink-2)}
 .chip.easy{background:var(--mint);color:#2B7A4B}
-.chip.mid{background:var(--sun);color:#8A5A00}
+.chip.med{background:var(--sun);color:#8A5A00}
 .chip.rec{background:var(--sky);color:#1D6A8A}
 .mini-stars{display:flex;gap:2px;flex:none}
 .mini-stars svg{width:20px;height:20px}
@@ -476,11 +476,24 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
 .dev-wa{font-weight:700;color:var(--ink-2);font-size:15px;margin-bottom:8px}
 .dev-card .btn{text-decoration:none}
 
+/* ---------- Menebalkan dengan jari ---------- */
+.trace-host{flex:1;display:flex;align-items:center;justify-content:center}
+.trace{display:flex;flex-direction:column;align-items:center;gap:12px}
+.trace-label{font-family:var(--font-display);font-weight:600;font-size:22px;background:#fff;border-radius:999px;padding:4px 18px;box-shadow:var(--shadow)}
+.trace-pad{position:relative;border-radius:28px;background:#fff;box-shadow:0 5px 0 var(--line),var(--shadow);overflow:hidden;touch-action:none}
+.trace-pad > *{position:absolute;inset:0;width:100%;height:100%}
+.trace-pad .t-ink{touch-action:none;cursor:crosshair}
+.trace-pad .t-top{pointer-events:none}
+.trace-pad.shake{animation:shake .45s}
+.t-start{animation:pulseDot 1.3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulseDot{50%{transform:scale(1.22)}}
+@media (orientation:landscape) and (max-height:560px){.play-body .trace-host{grid-column:1/-1}.trace{flex-direction:row;align-items:center}.trace-label{order:-1}}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.0.1 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.1.0 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -517,7 +530,7 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.0.1',
+  version: '1.1.0',
   // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
   developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,
@@ -532,15 +545,15 @@ const TIQO_CONFIG = Object.freeze({
   splashMinMs: 1500,
   // Pulau belajar. Urutan di sini = urutan di peta.
   islands: [
-    { id:'huruf',    name:'Pulau Huruf',    short:'Huruf',    goal:'Mengenali huruf dan bunyi awal kata.',
+    { id:'huruf',    name:'Pulau Huruf',    short:'Huruf',    goal:'Mengenali huruf, bunyi awal kata, dan menebalkan huruf.',
       bg:'#E6F5FC', band:'#BDE7F5', edge:'#8FCFE8', grass:'#9FDCF0' },
-    { id:'angka',    name:'Pulau Angka',    short:'Angka',    goal:'Mengenal angka, menghitung, dan membandingkan jumlah.',
+    { id:'angka',    name:'Pulau Angka',    short:'Angka',    goal:'Mengenal angka, menghitung, membandingkan, dan menebalkan angka.',
       bg:'#FFF6D9', band:'#FFE8A3', edge:'#F2CF6B', grass:'#FFE08A' },
     { id:'warna',    name:'Taman Warna',    short:'Warna', goal:'Mengenali warna, bentuk, dan mengelompokkan benda.',
       bg:'#EEF8EB', band:'#DDF1D8', edge:'#A9D9A0', grass:'#B7E4AE' },
     { id:'logika',   name:'Pulau Logika',   short:'Logika',   goal:'Mengenali pola, melatih daya ingat, dan mengamati perbedaan.',
       bg:'#F4F0FD', band:'#E8E0FA', edge:'#C3B2EE', grass:'#D2C5F5' },
-    { id:'hijaiyah', name:'Pulau Hijaiyah', short:'Hijaiyah', goal:'Mengenal huruf hijaiyah dan ucapan baik sehari-hari.',
+    { id:'hijaiyah', name:'Pulau Hijaiyah', short:'Hijaiyah', goal:'Mengenal dan menebalkan huruf hijaiyah, serta ucapan baik sehari-hari.',
       bg:'#E9F6F5', band:'#CDEDEA', edge:'#93D3CC', grass:'#A9E2D6' }
   ]
 });
@@ -921,6 +934,270 @@ const Art = (() => {
 })();
 
 /* =========================================================
+   4b. MENEBALKAN DENGAN JARI (TRACE)
+   - Huruf A–Z & angka 0–9: jalur goresan (urutan + arah) dalam
+     kotak 0..100. Anak mengikuti titik-titik dari titik hijau.
+   - Huruf hijaiyah: bentuk huruf diambil dari font, anak
+     "menebalkan" sampai bagian huruf tertutup.
+   Penilaian ramah anak: goresan yang jauh keluar jalur cukup
+   dihapus dan anak diajak mencoba lagi.
+   ========================================================= */
+const Trace = (() => {
+  // ---- Jalur goresan (urutan sesuai cara menulis di TK) ----
+  const STROKES = {
+    A: ['M50 10 L18 90', 'M50 10 L82 90', 'M31 60 L69 60'],
+    B: ['M25 10 L25 90', 'M25 10 L54 10 Q76 10 76 30 Q76 50 54 50 L25 50', 'M25 50 L58 50 Q81 50 81 70 Q81 90 58 90 L25 90'],
+    C: ['M78 26 C70 10 44 6 30 17 C12 32 12 68 30 83 C44 94 70 90 78 74'],
+    D: ['M25 10 L25 90', 'M25 10 L44 10 C88 10 88 90 44 90 L25 90'],
+    E: ['M25 10 L25 90', 'M25 10 L75 10', 'M25 50 L68 50', 'M25 90 L75 90'],
+    F: ['M25 10 L25 90', 'M25 10 L75 10', 'M25 50 L66 50'],
+    G: ['M78 26 C70 10 44 6 30 17 C12 32 12 68 30 83 C44 94 72 92 80 72 L80 56 L56 56'],
+    H: ['M22 10 L22 90', 'M78 10 L78 90', 'M22 50 L78 50'],
+    I: ['M50 10 L50 90', 'M32 10 L68 10', 'M32 90 L68 90'],
+    J: ['M42 10 L80 10', 'M64 10 L64 68 C64 94 28 96 22 72'],
+    K: ['M25 10 L25 90', 'M75 10 L25 58', 'M42 42 L78 90'],
+    L: ['M25 10 L25 90 L75 90'],
+    M: ['M18 90 L18 10 L50 62 L82 10 L82 90'],
+    N: ['M22 90 L22 10 L78 90 L78 10'],
+    O: ['M50 10 C26 10 15 30 15 50 C15 72 28 90 50 90 C72 90 85 72 85 50 C85 30 74 10 50 10'],
+    P: ['M25 10 L25 90', 'M25 10 L54 10 Q79 10 79 32 Q79 54 54 54 L25 54'],
+    Q: ['M50 10 C26 10 15 30 15 50 C15 72 28 90 50 90 C72 90 85 72 85 50 C85 30 74 10 50 10', 'M58 66 L84 92'],
+    R: ['M25 10 L25 90', 'M25 10 L54 10 Q79 10 79 32 Q79 54 54 54 L25 54', 'M48 54 L78 90'],
+    S: ['M77 24 C70 8 32 6 25 25 C18 45 78 47 78 70 C78 94 32 96 22 78'],
+    T: ['M18 10 L82 10', 'M50 10 L50 90'],
+    U: ['M22 10 L22 62 C22 97 78 97 78 62 L78 10'],
+    V: ['M18 10 L50 90 L82 10'],
+    W: ['M10 10 L29 90 L50 34 L71 90 L90 10'],
+    X: ['M20 10 L80 90', 'M80 10 L20 90'],
+    Y: ['M20 10 L50 50 L50 90', 'M80 10 L50 50'],
+    Z: ['M20 10 L80 10 L20 90 L80 90'],
+    0: ['M50 10 C30 10 23 30 23 50 C23 72 31 90 50 90 C69 90 77 72 77 50 C77 30 70 10 50 10'],
+    1: ['M33 26 L52 10 L52 90'],
+    2: ['M25 28 C27 7 75 5 75 30 C75 50 42 66 23 90 L79 90'],
+    3: ['M25 19 C40 3 77 8 74 30 C72 45 58 50 44 50 C60 50 79 56 78 72 C76 94 36 98 23 80'],
+    4: ['M58 10 L20 65 L82 65', 'M62 36 L62 90'],
+    5: ['M33 10 L29 47 C45 37 78 39 78 66 C78 94 37 96 24 81', 'M33 10 L74 10'],
+    6: ['M70 15 C52 4 25 18 24 54 C23 80 37 90 51 90 C67 90 78 79 78 64 C78 49 66 41 52 41 C38 41 26 50 25 60'],
+    7: ['M22 10 L78 10 L40 90'],
+    8: ['M50 10 C26 10 26 48 50 50 C76 52 77 90 50 90 C23 90 24 52 50 50 C74 48 74 10 50 10'],
+    9: ['M74 36 C74 19 63 10 50 10 C35 10 25 21 25 35 C25 51 37 60 50 60 C63 60 74 52 74 36 L74 90']
+  };
+  const hasStrokes = ch => !!STROKES[ch];
+  const strokesOf = ch => STROKES[ch];
+
+  // ---- Sampel titik dari jalur SVG ----
+  const NS = 'http://www.w3.org/2000/svg';
+  let probe = null; const cache = {};
+  function samplePath(d, step = 2.2) {
+    if (cache[d]) return cache[d];
+    if (!probe) { probe = document.createElementNS(NS, 'svg'); probe.setAttribute('width', '0'); probe.setAttribute('height', '0');
+      probe.style.cssText = 'position:absolute;visibility:hidden;left:-9px;top:-9px'; document.body.appendChild(probe); }
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); probe.appendChild(p);
+    const len = p.getTotalLength(), n = Math.max(2, Math.ceil(len / step)), pts = [];
+    for (let i = 0; i <= n; i++) { const q = p.getPointAtLength(len * i / n); pts.push([q.x, q.y]); }
+    p.remove();
+    return (cache[d] = pts);
+  }
+
+  // ---- Bentuk huruf hijaiyah dari font ----
+  const AR_FONT = '"Noto Naskh Arabic","Amiri","Scheherazade New","Noto Sans Arabic",serif';
+  async function fontReady(ch) {
+    if (!document.fonts || !document.fonts.load) return;
+    try { await Promise.race([document.fonts.load(`700 80px ${AR_FONT}`, ch), U.wait(1800)]); } catch (e) {}
+  }
+  function glyphFit(ctx, ch) {
+    ctx.font = `700 100px ${AR_FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    try { ctx.direction = 'ltr'; } catch (e) {}
+    const m = ctx.measureText(ch);
+    const L = m.actualBoundingBoxLeft || 0, R = m.actualBoundingBoxRight || m.width, A = m.actualBoundingBoxAscent || 70, D = m.actualBoundingBoxDescent || 10;
+    const s = Math.min(66 / Math.max(1, L + R), 74 / Math.max(1, A + D));
+    return { size: 100 * s, x: 50 - (R - L) * s / 2, y: 50 - (D - A) * s / 2 };
+  }
+  function drawGlyph(ctx, ch, fit) {
+    ctx.font = `700 ${fit.size}px ${AR_FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    try { ctx.direction = 'ltr'; } catch (e) {}
+  }
+  const glyphCache = {};
+  async function glyphTargets(ch) {
+    if (glyphCache[ch]) return glyphCache[ch];
+    await fontReady(ch);
+    const c = document.createElement('canvas'); c.width = c.height = 100;
+    const x = c.getContext('2d'); const fit = glyphFit(x, ch);
+    drawGlyph(x, ch, fit); x.fillStyle = '#000'; x.fillText(ch, fit.x, fit.y);
+    const data = x.getImageData(0, 0, 100, 100).data, pts = [];
+    for (let y = 1; y < 100; y += 3) for (let xx = 1; xx < 100; xx += 3) if (data[(y * 100 + xx) * 4 + 3] > 110) pts.push([xx + .5, y + .5]);
+    // Gambar panduan dibuat SEKALI dari font yang sama dengan area penilaian,
+    // jadi bentuk yang dilihat anak selalu cocok dengan yang dinilai.
+    const art = st => { const c2 = document.createElement('canvas'); c2.width = c2.height = 600; const y2 = c2.getContext('2d');
+      y2.scale(6, 6); drawGlyph(y2, ch, fit); y2.fillStyle = st ? '#CDEFD8' : '#F1EDFB'; y2.fillText(ch, fit.x, fit.y);
+      if (!st) { y2.setLineDash([1.6, 2.2]); y2.lineWidth = .9; y2.strokeStyle = '#A992E6'; y2.strokeText(ch, fit.x, fit.y); }
+      return c2; };
+    const res = { pts, fit, todo: art(false), done: art(true) };
+    let loaded = true; try { loaded = !document.fonts || document.fonts.check(`700 80px ${AR_FONT}`, ch); } catch (e) {}
+    if (loaded) glyphCache[ch] = res;
+    return res;
+  }
+
+  /* ---- Widget menebalkan ----
+     r: { mode:'path', strokes:[...] } atau { mode:'mask', ch }
+     cb: onOff(), onPart(), onDone(score) */
+  function mount(host, r, cb) {
+    const isPath = r.mode === 'path';
+    const TOL = isPath ? 9 : 7, OFF = isPath ? 15 : 11, TH = isPath ? .82 : .8;
+    const el = U.h(`<div class="trace">
+      ${r.label ? `<span class="trace-label">${U.esc(r.label)}</span>` : ''}
+      <div class="trace-pad" role="img" aria-label="Papan menebalkan">
+        <svg class="t-base" viewBox="0 0 100 100" aria-hidden="true"></svg>
+        <canvas class="t-guide" aria-hidden="true"></canvas>
+        <canvas class="t-ink" aria-label="Tebalkan dengan jarimu"></canvas>
+        <svg class="t-top" viewBox="0 0 100 100" aria-hidden="true"></svg>
+      </div>
+      <button class="btn btn-white btn-sm t-clear">${Art.I.replay} Ulangi</button>
+    </div>`);
+    host.appendChild(el);
+    const pad = U.$('.trace-pad', el), base = U.$('.t-base', el), top = U.$('.t-top', el);
+    const gcv = U.$('.t-guide', el), icv = U.$('.t-ink', el);
+    const gx = gcv.getContext('2d'), ix = icv.getContext('2d');
+    let groups = [], cov = [], done = [], flat = [], strokes = [], active = null, activeId = null;
+    let ready = false, finished = false, offCount = 0, S = 300, glyph = null, dead = false;
+
+    function layout() {
+      const land = innerWidth > innerHeight && innerHeight < 560;
+      const availH = innerHeight - (land ? 180 : 300);
+      S = Math.round(Math.max(land ? 170 : 200, Math.min(innerWidth - 40, 400, availH)));
+      pad.style.width = pad.style.height = S + 'px';
+      const dpr = Math.min(3, window.devicePixelRatio || 1);
+      [gcv, icv].forEach(c => { c.width = Math.round(S * dpr); c.height = Math.round(S * dpr); });
+      const k = S * dpr / 100;
+      gx.setTransform(k, 0, 0, k, 0, 0); ix.setTransform(k, 0, 0, k, 0, 0);
+      drawGuide(); drawInk();
+    }
+
+    function drawGuide() {
+      if (isPath) {
+        const lines = `<g stroke="#EEE9F8" stroke-width=".8" stroke-dasharray="2 2"><path d="M4 10 H96"/><path d="M4 50 H96"/><path d="M4 90 H96"/></g>`;
+        const tracks = r.strokes.map((d, i) => `<path d="${d}" fill="none" stroke="${done[i] ? '#CDEFD8' : '#F1EDFB'}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+        const dots = r.strokes.map((d, i) => done[i] ? '' : `<path d="${d}" fill="none" stroke="#A992E6" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="0.01 4.6"/>`).join('');
+        base.innerHTML = lines + tracks + dots;
+        const nx = finished ? -1 : done.findIndex(v => !v);
+        if (nx >= 0) {
+          const pts = groups[nx], p0 = pts[0], p1 = pts[Math.min(pts.length - 1, 6)];
+          const a = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]) * 180 / Math.PI;
+          const pa = pts[Math.min(pts.length - 1, 9)];
+          top.innerHTML = `<g transform="translate(${pa[0]} ${pa[1]}) rotate(${a})"><path d="M-3 -4 L4 0 L-3 4 Z" fill="#2E9E62" opacity=".85"/></g>
+            <g class="t-start"><circle cx="${p0[0]}" cy="${p0[1]}" r="5.6" fill="#2E9E62" stroke="#fff" stroke-width="1.4"/>
+            <text x="${p0[0]}" y="${p0[1] + .2}" text-anchor="middle" dominant-baseline="central" font-family="Nunito,sans-serif" font-weight="800" font-size="6.2" fill="#fff">${nx + 1}</text></g>`;
+        } else top.innerHTML = '';
+      } else {
+        gx.clearRect(0, 0, 100, 100);
+        if (!glyph) return;
+        gx.drawImage(finished ? glyph.done : glyph.todo, 0, 0, 100, 100);
+      }
+    }
+
+    function inkPath(st) {
+      ix.beginPath(); ix.moveTo(st[0][0], st[0][1]);
+      if (st.length === 1) ix.lineTo(st[0][0] + .01, st[0][1]);
+      for (let k = 1; k < st.length; k++) ix.lineTo(st[k][0], st[k][1]);
+    }
+    function inkStyle() { ix.lineCap = 'round'; ix.lineJoin = 'round'; ix.lineWidth = isPath ? 10 : 8; ix.strokeStyle = 'rgba(126,98,201,.88)'; }
+    function drawInk() {
+      ix.save(); ix.setTransform(1, 0, 0, 1, 0, 0); ix.clearRect(0, 0, icv.width, icv.height); ix.restore();
+      inkStyle(); strokes.forEach(st => { inkPath(st); ix.stroke(); });
+      if (finished) {
+        ix.save(); ix.globalCompositeOperation = 'source-in';
+        const g = ix.createLinearGradient(0, 0, 100, 100); g.addColorStop(0, '#7E62C9'); g.addColorStop(.5, '#3BA6D8'); g.addColorStop(1, '#2E9E62');
+        ix.fillStyle = g; ix.fillRect(0, 0, 100, 100); ix.restore();
+      }
+    }
+
+    const pos = e => { const b = icv.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * 100, (e.clientY - b.top) / b.height * 100]; };
+    function addPoint(p) {
+      const last = active[active.length - 1];
+      const d = Math.hypot(p[0] - last[0], p[1] - last[1]);
+      if (d < .6) return;
+      const n = Math.ceil(d / 2);
+      for (let k = 1; k <= n; k++) active.push([last[0] + (p[0] - last[0]) * k / n, last[1] + (p[1] - last[1]) * k / n]);
+      inkStyle(); ix.beginPath(); ix.moveTo(last[0], last[1]); ix.lineTo(p[0], p[1]); ix.stroke();
+    }
+    function down(e) {
+      if (!ready || finished || activeId !== null) return;
+      e.preventDefault(); Sound.unlock();
+      try { icv.setPointerCapture(e.pointerId); } catch (er) {}
+      activeId = e.pointerId; active = [pos(e)]; strokes.push(active);
+      inkStyle(); inkPath(active); ix.stroke();
+    }
+    function move(e) {
+      if (e.pointerId !== activeId || !active) return;
+      e.preventDefault();
+      const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      (evs.length ? evs : [e]).forEach(ev => addPoint(pos(ev)));
+    }
+    function up(e) {
+      if (e.pointerId !== activeId) return;
+      const st = active; active = null; activeId = null;
+      evaluate(st);
+    }
+
+    const near = (p, tol2) => { for (const t of flat) { const dx = t[0] - p[0], dy = t[1] - p[1]; if (dx * dx + dy * dy <= tol2) return true; } return false; };
+    function evaluate(st) {
+      let len = 0; for (let k = 1; k < st.length; k++) len += Math.hypot(st[k][0] - st[k - 1][0], st[k][1] - st[k - 1][1]);
+      const far = st.filter(p => !near(p, OFF * OFF)).length / st.length;
+      if ((len > 12 && far > .45) || (len <= 12 && far === 1)) {
+        strokes.pop(); drawInk(); offCount++;
+        pad.classList.remove('shake'); void pad.offsetWidth; pad.classList.add('shake');
+        cb.onOff && cb.onOff(); return;
+      }
+      const T2 = TOL * TOL; let changed = false;
+      groups.forEach((g, gi) => {
+        if (done[gi]) return;
+        g.forEach((t, ti) => {
+          if (cov[gi][ti]) return;
+          for (const p of st) { const dx = t[0] - p[0], dy = t[1] - p[1]; if (dx * dx + dy * dy <= T2) { cov[gi][ti] = 1; break; } }
+        });
+        const frac = cov[gi].reduce((a, b) => a + b, 0) / g.length;
+        if (frac >= TH) { done[gi] = true; changed = true; }
+      });
+      if (done.every(Boolean)) {
+        finished = true; drawGuide(); drawInk();
+        cb.onDone && cb.onDone(offCount === 0 ? 1 : offCount <= 2 ? .5 : .2, pad);
+      } else if (changed) { drawGuide(); cb.onPart && cb.onPart(); }
+    }
+    function clear() {
+      if (finished) return;
+      strokes = []; cov = groups.map(g => new Uint8Array(g.length)); done = groups.map(() => false);
+      drawGuide(); drawInk(); Sound.play('tap');
+    }
+
+    icv.addEventListener('pointerdown', down);
+    icv.addEventListener('pointermove', move);
+    icv.addEventListener('pointerup', up);
+    icv.addEventListener('pointercancel', up);
+    icv.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+    icv.addEventListener('contextmenu', e => e.preventDefault());
+    U.$('.t-clear', el).addEventListener('click', clear);
+    const onResize = () => { if (!dead) layout(); };
+    window.addEventListener('resize', onResize);
+
+    (async () => {
+      if (isPath) groups = r.strokes.map(d => samplePath(d));
+      else { glyph = await glyphTargets(r.ch); groups = [glyph.pts.length ? glyph.pts : [[50, 50]]]; }
+      if (dead) return;
+      flat = groups.flat(); cov = groups.map(g => new Uint8Array(g.length)); done = groups.map(() => false);
+      ready = true; layout();
+    })();
+    layout();
+
+    const api = { el, pad, destroy() { dead = true; window.removeEventListener('resize', onResize); },
+      _debug: () => ({ groups, done, finished, offCount, rect: icv.getBoundingClientRect() }) };
+    Trace._last = api;
+    return api;
+  }
+
+  return { mount, hasStrokes, strokesOf, STROKES, _last: null };
+})();
+
+/* =========================================================
    5. MISI: GENERATOR SOAL + KATALOG
    Katalog (MISSIONS) hanya berisi data. Generator membuat soal
    dari bank konten dengan jawaban yang selalu dapat divalidasi.
@@ -1239,6 +1516,25 @@ const Gen = (() => {
       return [{ kind: 'memory', say, hint: 'Ingat-ingat letak kartunya, ya.', cols: pairs <= 3 ? 3 : (pairs <= 4 ? 4 : 4), cards: shuffle(cards) }];
     },
 
+    /* ---------------- MENEBALKAN ---------------- */
+    trace({ kind = 'latin', set = '', from = 0, to = 6 }, rounds) {
+      if (kind === 'hijaiyah') {
+        const pool = C.HIJAIYAH.slice(from, to + 1);
+        const picks = (rounds >= pool.length ? pool : sample(pool, rounds)).sort((a, b) => C.HIJAIYAH.indexOf(a) - C.HIJAIYAH.indexOf(b));
+        return picks.map(h => ({ kind: 'trace', mode: 'mask', ch: h.ch, label: h.name,
+          say: `Ini huruf ${h.name}. Tebalkan hurufnya dengan jarimu sampai penuh, ya.`,
+          hint: 'Gosok pelan-pelan di atas huruf yang samar, ya.', reveal: `Ini huruf ${h.name}` }));
+      }
+      const chars = set.split('');
+      const picks = (rounds >= chars.length ? chars : sample(chars, rounds)).sort((a, b) => chars.indexOf(a) - chars.indexOf(b));
+      return picks.map(ch => {
+        const digit = /\d/.test(ch), nm = digit ? `angka ${NUM(+ch)}` : `huruf ${ch}`;
+        return { kind: 'trace', mode: 'path', ch, strokes: Trace.strokesOf(ch),
+          say: `Tebalkan ${nm}. Mulai dari titik hijau, lalu ikuti titik-titiknya.`,
+          hint: 'Ikuti titik-titiknya, mulai dari titik hijau.', reveal: `Ini ${nm}` };
+      });
+    },
+
     /* ---------------- HIJAIYAH ---------------- */
     pickHijaiyah({ from = 0, to = 6, n = 3, mode = 'see' }, rounds) {
       const set = C.HIJAIYAH.slice(from, to + 1);
@@ -1293,6 +1589,9 @@ const MISSIONS = [
   { id:'huruf-5', island:'huruf', title:'Huruf Awal Benda',   goal:'Mencocokkan gambar dengan huruf awalnya', level:1, gen:'letterInitial',params:{n:3}, rounds:5 },
   { id:'huruf-6', island:'huruf', title:'Gambar Bunyi Awal',  goal:'Memilih gambar sesuai bunyi awal',        level:2, gen:'initialSound', params:{n:3}, rounds:5 },
   { id:'huruf-7', island:'huruf', title:'Huruf Besar & Kecil',goal:'Mencocokkan huruf besar dan kecil',       level:2, gen:'memory',       params:{pairs:4, set:'case'}, rounds:1 },
+  { id:'huruf-8', island:'huruf', title:'Tebalkan A sampai I',goal:'Menebalkan huruf A–I dengan jari',        level:1, gen:'trace',        params:{set:'ABCDEFGHI'}, rounds:4 },
+  { id:'huruf-9', island:'huruf', title:'Tebalkan J sampai R',goal:'Menebalkan huruf J–R dengan jari',        level:1, gen:'trace',        params:{set:'JKLMNOPQR'}, rounds:4 },
+  { id:'huruf-10',island:'huruf', title:'Tebalkan S sampai Z',goal:'Menebalkan huruf S–Z dengan jari',        level:2, gen:'trace',        params:{set:'STUVWXYZ'}, rounds:4 },
   // Pulau Angka
   { id:'angka-1', island:'angka', title:'Hitung 1 sampai 5',  goal:'Menghitung benda sampai 5',               level:1, gen:'countObjects', params:{min:1,max:5,n:3}, rounds:5 },
   { id:'angka-2', island:'angka', title:'Kenal Angka 1–5',    goal:'Mengenali lambang angka 1–5',             level:1, gen:'pickNumber',   params:{min:1,max:5,n:3}, rounds:5 },
@@ -1304,6 +1603,8 @@ const MISSIONS = [
   { id:'angka-8', island:'angka', title:'Urutkan Angka Acak', goal:'Mengurutkan angka dari kecil ke besar',   level:2, gen:'orderNumbers', params:{mode:'rand',size:4,max:10}, rounds:3 },
   { id:'angka-9', island:'angka', title:'Angka Berikutnya',   goal:'Mengetahui angka setelahnya',             level:2, gen:'numberAfter',  params:{max:9}, rounds:5 },
   { id:'angka-10',island:'angka', title:'Tambah-tambahan',    goal:'Menjumlahkan benda sampai 5',             level:2, gen:'addSimple',    params:{maxSum:5}, rounds:5 },
+  { id:'angka-11',island:'angka', title:'Tebalkan Angka 1–5', goal:'Menebalkan angka 1–5 dengan jari',        level:1, gen:'trace',        params:{set:'12345'}, rounds:5 },
+  { id:'angka-12',island:'angka', title:'Tebalkan Angka 6–0', goal:'Menebalkan angka 6, 7, 8, 9, dan 0',      level:2, gen:'trace',        params:{set:'67890'}, rounds:5 },
   // Taman Warna
   { id:'warna-1', island:'warna', title:'Kenal Warna',        goal:'Mengenali warna dasar',                   level:1, gen:'pickColor',    params:{n:3,pool:6}, rounds:5 },
   { id:'warna-2', island:'warna', title:'Warna Benda',        goal:'Mengenali warna benda di sekitar',        level:1, gen:'objectColor',  params:{n:3}, rounds:5 },
@@ -1327,7 +1628,10 @@ const MISSIONS = [
   { id:'hijaiyah-3',island:'hijaiyah',title:'Tho sampai Ya',   goal:'Mengenal huruf hijaiyah ط–ي',           level:2, gen:'pickHijaiyah', params:{from:15,to:27,n:3,mode:'see'}, rounds:5 },
   { id:'hijaiyah-4',island:'hijaiyah',title:'Dengar Hijaiyah', goal:'Mengenali huruf hijaiyah dari bunyinya', level:2, gen:'pickHijaiyah', params:{from:0,to:14,n:3,mode:'hear'}, rounds:5 },
   { id:'hijaiyah-5',island:'hijaiyah',title:'Ucapan Baik',     goal:'Mengenal kalimat thayyibah sehari-hari',level:1, gen:'ucapan',       params:{n:3}, rounds:5 },
-  { id:'hijaiyah-6',island:'hijaiyah',title:'Kartu Hijaiyah',  goal:'Melatih ingatan huruf hijaiyah',        level:2, gen:'memory',       params:{pairs:4,set:'hijaiyah'}, rounds:1 }
+  { id:'hijaiyah-6',island:'hijaiyah',title:'Kartu Hijaiyah',  goal:'Melatih ingatan huruf hijaiyah',        level:2, gen:'memory',       params:{pairs:4,set:'hijaiyah'}, rounds:1 },
+  { id:'hijaiyah-7',island:'hijaiyah',title:'Tebalkan Alif–Kho',goal:'Menebalkan huruf hijaiyah ا–خ',          level:1, gen:'trace',        params:{kind:'hijaiyah',from:0,to:6}, rounds:4 },
+  { id:'hijaiyah-8',island:'hijaiyah',title:'Tebalkan Dal–Dhod',goal:'Menebalkan huruf hijaiyah د–ض',          level:2, gen:'trace',        params:{kind:'hijaiyah',from:7,to:14}, rounds:4 },
+  { id:'hijaiyah-9',island:'hijaiyah',title:'Tebalkan Tho–Ya',  goal:'Menebalkan huruf hijaiyah ط–ي',          level:2, gen:'trace',        params:{kind:'hijaiyah',from:15,to:27}, rounds:4 }
 ];
 
 /* Validasi soal: setiap soal pilihan harus punya tepat satu jawaban benar,
@@ -1342,6 +1646,9 @@ function validateRounds(rounds) {
       if (!r.items.some(i => i.correct)) return false;
     } else if (r.kind === 'order') {
       if (r.items.length !== r.answer.length) return false;
+    } else if (r.kind === 'trace') {
+      if (r.mode === 'path' && !(r.strokes && r.strokes.length)) return false;
+      if (r.mode === 'mask' && !r.ch) return false;
     } else if (r.kind === 'memory') {
       const c = {}; r.cards.forEach(x => c[x.key] = (c[x.key] || 0) + 1);
       if (Object.values(c).some(v => v !== 2)) return false;
@@ -1690,7 +1997,8 @@ const Engine = (() => {
   function run(root, mission, { onFinish, onExit }) {
     const rounds = buildRounds(mission);
     const scores = [];
-    let i = 0, alive = true, timers = [];
+    let i = 0, alive = true, timers = [], disposers = [];
+    const dispose = () => disposers.splice(0).forEach(f => { try { f(); } catch (e) {} });
     const later = (fn, ms) => { const t = setTimeout(() => alive && fn(), ms); timers.push(t); return t; };
 
     root.innerHTML = `
@@ -1733,10 +2041,10 @@ const Engine = (() => {
       btn.onclick = () => { Sound.play('tap'); hideFb(); later(onNext, 180); };
     }
     let tryT;
-    function showTry(hint) {
+    function showTry(hint, lines) {
       Sound.play('soft');
       fb.className = 'fb try';
-      const line = U.pick(RETRY);
+      const line = U.pick(lines || RETRY);
       fb.innerHTML = `<div class="m">${Art.mascot('berpikir')}</div><div class="txt"><b>${U.esc(line)}</b><span>${U.esc(hint || '')}</span></div>`;
       requestAnimationFrame(() => fb.classList.add('show'));
       Sound.say(line + ' ' + (hint || ''));
@@ -1755,18 +2063,19 @@ const Engine = (() => {
     }
 
     function header(r) {
-      return `<div class="instr"><div class="m">${Art.mascot(r.kind === 'memory' ? 'penasaran' : 'senang')}</div><div class="bubble">${U.esc(r.say)}</div></div>
+      return `<div class="instr"><div class="m">${Art.mascot(r.kind === 'memory' ? 'penasaran' : r.kind === 'trace' ? 'semangat' : 'senang')}</div><div class="bubble">${U.esc(r.say)}</div></div>
               ${r.prompt ? `<div class="prompt">${r.prompt}</div>` : ''}`;
     }
 
     function next() {
       if (!alive) return;
       if (i >= rounds.length) return finish();
+      dispose();
       setBars();
       const r = rounds[i];
       body.innerHTML = header(r);
       body.style.animation = 'none'; void body.offsetWidth; body.style.animation = 'fadeUp .3s ease both';
-      ({ choice: doChoice, order: doOrder, findAll: doFind, memory: doMemory })[r.kind](r);
+      ({ choice: doChoice, order: doOrder, findAll: doFind, memory: doMemory, trace: doTrace })[r.kind](r);
       later(() => Sound.say(r.say), 250);
       // Fitur bantu hitung: sentuh benda untuk memberi nomor
       let cnt = 0;
@@ -1883,11 +2192,23 @@ const Engine = (() => {
       body.appendChild(grid);
     }
 
+    /* ---- Menebalkan dengan jari ---- */
+    function doTrace(r) {
+      const host = U.h('<div class="trace-host"></div>');
+      body.appendChild(host);
+      const w = Trace.mount(host, r, {
+        onOff: () => showTry(r.hint, ['Ups, keluar jalur. Ayo coba lagi!', 'Pelan-pelan saja, kamu pasti bisa!', 'Sedikit lagi, ikuti titiknya ya!']),
+        onPart: () => Sound.play('star'),
+        onDone: (score, pad) => { Sound.play('star'); burst(pad); later(() => done(score, null, r.reveal), 650); }
+      });
+      disposers.push(w.destroy);
+    }
+
     function finish() {
       stop();
       onFinish({ mission, scores, stars: Rewards.starsFor(scores), rounds: rounds.length });
     }
-    function stop() { alive = false; timers.forEach(clearTimeout); Sound.stop(); }
+    function stop() { alive = false; timers.forEach(clearTimeout); dispose(); Sound.stop(); }
 
     next();
     return { stop };
@@ -1903,7 +2224,7 @@ const Screens = (() => {
   const prof = () => Store.active();
   const tileStyle = i => `--tile-bg:${i.bg};--tile-band:${i.band};--tile-edge:${i.edge}`;
   const miniStars = n => `<span class="mini-stars" aria-label="${n} dari 3 bintang">${[1, 2, 3].map(k => Art.star(k <= n)).join('')}</span>`;
-  const levelChip = m => m.level === 1 ? '<span class="chip easy">● Mudah</span>' : '<span class="chip mid">●● Sedang</span>';
+  const levelChip = m => m.level === 1 ? '<span class="chip easy">● Mudah</span>' : '<span class="chip med">●● Sedang</span>';
 
   function topbar() {
     const p = prof(), multi = Store.profiles.length > 1;
@@ -2003,7 +2324,7 @@ const Screens = (() => {
           return `<button class="mission" data-go="/play/${m.id}" aria-label="${esc(m.title)}">
             <span class="num">${k + 1}</span>
             <span class="mid"><b>${esc(m.title)}</b><span>${esc(m.goal)}</span>
-              <span class="meta">${levelChip(m)}${p.age !== 'semua' && Rewards.fits(m, p) ? '<span class="chip rec">Cocok untukmu</span>' : ''}</span></span>
+              <span class="meta">${levelChip(m)}${m.gen === 'trace' ? '<span class="chip">✍️ Menebalkan</span>' : ''}${p.age !== 'semua' && Rewards.fits(m, p) ? '<span class="chip rec">Cocok untukmu</span>' : ''}</span></span>
             ${miniStars(rec?.best || 0)}
           </button>`;
         }).join('')}
