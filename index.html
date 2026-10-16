@@ -489,11 +489,26 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
 @keyframes pulseDot{50%{transform:scale(1.22)}}
 @media (orientation:landscape) and (max-height:560px){.play-body .trace-host{grid-column:1/-1}.trace{flex-direction:row;align-items:center}.trace-label{order:-1}}
 
+/* ---------- Waktu bermain ---------- */
+.time-banner{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:35;background:#FFF4D6;color:#8A5A00;
+  font-weight:800;font-size:13px;line-height:1.25;padding:8px 14px;border-radius:16px;box-shadow:var(--shadow);width:max-content;max-width:min(calc(100% - 150px),420px);text-align:center;animation:fadeIn .3s ease both}
+.rest{text-align:center;padding-top:10px;display:flex;flex-direction:column;align-items:center}
+.rest-sky{width:100%;max-width:360px}
+.rest-sky svg{width:100%;height:auto}
+.rest-m{width:150px;margin-top:-26px;animation:bob 3.2s ease-in-out infinite}
+.rest h1{font-size:30px;margin-top:6px}
+.rest-msg{color:var(--ink-2);font-weight:700;max-width:340px;margin:8px auto 0}
+.rest-card{display:flex;align-items:center;gap:14px;margin-top:20px;text-align:left;min-width:260px}
+.rest-card b{display:block;font-size:18px}
+.rest-card span{color:var(--ink-2);font-weight:700;font-size:14px}
+.rest-tip{margin:18px auto 0;max-width:320px;font-weight:700;color:var(--ink-2);background:rgba(255,255,255,.7);border-radius:16px;padding:10px 14px}
+.rest-parent{margin-top:26px}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.1.0 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.2.0 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -530,7 +545,7 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.1.0',
+  version: '1.2.0',
   // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
   developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,
@@ -1681,6 +1696,7 @@ const Store = (() => {
     narration: true, sfx: true, rate: 'normal',
     showSchool: TIQO_CONFIG.school.enabledByDefault,
     schoolLine: TIQO_CONFIG.school.line, schoolName: TIQO_CONFIG.school.name,
+    playLimit: 0, bedtime: 0,
     activeProfileId: null
   };
   let settings = { ...DEFAULT_SETTINGS };
@@ -1788,7 +1804,7 @@ const Store = (() => {
   function exportAll() {
     return { app: 'tiqo', format: 1, exportedAt: new Date().toISOString(), version: TIQO_CONFIG.version,
       profiles: profiles.map(p => ({ ...p })), progress: profiles.map(p => progress[p.id]).filter(Boolean),
-      settings: { narration: settings.narration, sfx: settings.sfx, rate: settings.rate, showSchool: settings.showSchool, schoolLine: settings.schoolLine, schoolName: settings.schoolName } };
+      settings: { narration: settings.narration, sfx: settings.sfx, rate: settings.rate, showSchool: settings.showSchool, schoolLine: settings.schoolLine, schoolName: settings.schoolName, playLimit: settings.playLimit, bedtime: settings.bedtime } };
   }
   async function importAll(data) {
     if (!data || data.app !== 'tiqo' || !Array.isArray(data.profiles) || !Array.isArray(data.progress) || !data.profiles.length) throw new Error('Berkas cadangan tidak dikenali.');
@@ -1807,7 +1823,7 @@ const Store = (() => {
     await wipeData();
     profiles = ps; progress = prs;
     for (const p of profiles) { await persistProfile(p); await persistProgress(p.id); }
-    if (data.settings) ['narration','sfx','rate','showSchool','schoolLine','schoolName'].forEach(k => { if (k in data.settings) settings[k] = data.settings[k]; });
+    if (data.settings) ['narration','sfx','rate','showSchool','schoolLine','schoolName','playLimit','bedtime'].forEach(k => { if (k in data.settings) settings[k] = data.settings[k]; });
     setSetting('activeProfileId', profiles[0].id);
   }
   async function wipeData() {
@@ -1982,6 +1998,117 @@ const Rewards = (() => {
   }
 
   return { starsFor, summary, BADGES, checkBadges, badgeIcon, daily, nextMission, fits };
+})();
+
+/* =========================================================
+   8b. WAKTU BERMAIN (diatur orang tua)
+   - Batas waktu harian, berlaku untuk SETIAP profil anak.
+   - Jam tidur: setelah jam ini (sampai 05.00) TIQO istirahat.
+   - Waktu dihitung hanya saat TIQO terbuka di layar anak
+     (bukan Area Orang Tua, bukan saat aplikasi di latar belakang).
+   - Bila waktu habis di tengah misi, anak boleh menyelesaikan
+     misinya dulu (maksimal 5 menit tambahan), lalu istirahat.
+   Data disimpan di perangkat (localStorage "tiqo:usage").
+   ========================================================= */
+const PlayTime = (() => {
+  const KEY = 'tiqo:usage', GRACE = 5 * 60, WARN = 2 * 60;
+  const LIMITS = [0, 15, 20, 30, 45, 60];          // menit; 0 = tanpa batas
+  const BEDTIMES = [0, 19, 20, 21];                // jam; 0 = mati
+  let data = {}, last = Date.now(), dirty = 0, warnedFor = '', started = false, bannerAt = 0;
+
+  const load = () => { try { data = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { data = {}; } };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} dirty = 0; };
+  function rec(pid, date = U.todayKey()) {
+    const p = data[pid] || (data[pid] = {});
+    if (!p[date]) {
+      p[date] = { s: 0, b: 0 };
+      const keys = Object.keys(p).sort(); while (keys.length > 14) delete p[keys.shift()]; // simpan 14 hari terakhir
+    }
+    return p[date];
+  }
+
+  const limitMin = () => Number(Store.settings.playLimit) || 0;
+  const bedHour = () => Number(Store.settings.bedtime) || 0;
+  function isBedtime(d = new Date()) { const b = bedHour(); if (!b) return false; const h = d.getHours(); return h >= b || h < 5; }
+
+  function status(pid) {
+    const r = rec(pid), lim = limitMin() * 60;
+    const allowed = lim ? lim + r.b : Infinity;
+    const remaining = allowed - r.s;
+    return { used: r.s, bonus: r.b, limit: lim, remaining, over: lim ? -remaining : 0,
+      reason: isBedtime() ? 'bedtime' : (lim && remaining <= 0 ? 'limit' : null) };
+  }
+  const blocked = pid => status(pid).reason;
+
+  // Rute yang tidak dihitung dan tetap boleh dibuka saat waktu habis
+  const route = () => (location.hash || '#/home').slice(1).split('?')[0];
+  const free = r => r === '/parent' || r === '/rest' || r === '/who';
+
+  function tick() {
+    const now = Date.now(), dt = Math.min(10, (now - last) / 1000); last = now;
+    if (document.visibilityState !== 'visible' || !U.$('#view > *')) return;
+    const r = route(), prof = Store.active(); if (!prof || free(r)) return;
+    const st0 = status(prof.id);
+    if (st0.reason && !r.startsWith('/play')) { if (r !== '/result') App.go('/rest', true); return; }
+    rec(prof.id).s += dt; if ((dirty += dt) >= 20) save();
+    const st = status(prof.id);
+    // Peringatan lembut 2 menit sebelum habis
+    if (st.limit && st.remaining > 0 && st.remaining <= WARN && warnedFor !== prof.id + U.todayKey()) {
+      warnedFor = prof.id + U.todayKey();
+      UI.toast('⏰ 2 menit lagi waktu bermainmu, ya!', 4000); Sound.say('Dua menit lagi waktu bermainmu, ya!');
+    }
+    if (st.reason) {
+      if (r.startsWith('/play')) {
+        if (!U.$('.time-banner')) {
+          bannerAt = now;
+          document.body.appendChild(U.h('<div class="time-banner" role="status">⏰ Waktu habis. Selesaikan misi ini dulu, ya!</div>'));
+          Sound.say('Waktu bermain sudah habis. Selesaikan misi ini dulu, ya!');
+        }
+        if (now - bannerAt > GRACE * 1000) App.go('/rest', true);
+      } else if (r !== '/result') App.go('/rest', true);
+    }
+  }
+
+  function addBonus(pid, minutes) { rec(pid).b += minutes * 60; save(); }
+  function usedToday(pid) { return rec(pid).s; }
+  const fmt = sec => { const m = Math.floor(sec / 60); return m < 1 ? 'kurang dari 1 menit' : `${m} menit`; };
+
+  function start() {
+    if (started) return; started = true; load();
+    setInterval(tick, 5000);
+    document.addEventListener('visibilitychange', () => { last = Date.now(); if (document.visibilityState === 'hidden') save(); });
+    window.addEventListener('pagehide', save);
+  }
+
+  /* ---- Layar istirahat ---- */
+  function restScreen() {
+    const prof = Store.active(), st = status(prof.id);
+    if (!st.reason) return App.redirect('/home');
+    U.$$('.time-banner').forEach(x => x.remove()); U.$$('.toast.show').forEach(x => x.classList.remove('show'));
+    const night = st.reason === 'bedtime';
+    const title = night ? 'Sudah Malam!' : 'Waktunya Istirahat!';
+    const msg = night ? 'Waktunya tidur supaya besok segar. Sampai jumpa besok pagi, ya!'
+                      : 'Kamu sudah bermain dengan hebat hari ini. Besok kita bertualang lagi, ya!';
+    const el = U.h(`<main class="screen no-nav rest">
+      <div class="rest-sky" aria-hidden="true">
+        <svg viewBox="0 0 120 60"><path d="M92 6 a16 16 0 1 0 14 24 a12 12 0 1 1 -14 -24z" fill="#FFE08A"/>
+        ${[[14,14],[34,30],[58,10],[74,34],[110,46]].map(([x, y]) => `<polygon points="${Art.starPts(x, y, 3.4, 1.5)}" fill="#fff" opacity=".9"/>`).join('')}</svg>
+      </div>
+      <div class="rest-m">${Art.mascot('senang')}</div>
+      <h1>${title}</h1>
+      <p class="rest-msg">${U.esc(msg)}</p>
+      <div class="card rest-card">
+        <div class="avatar">${U.esc(prof.avatar)}</div>
+        <div><b>${U.esc(prof.nickname)}</b><span>Bermain hari ini: ${fmt(st.used)}</span></div>
+      </div>
+      <p class="rest-tip">${night ? '🌙' : '☀️'} ${night ? 'Selamat tidur. Jangan lupa berdoa sebelum tidur!' : 'Ayo istirahatkan mata, minum air, dan bermain di luar.'}</p>
+      <button class="btn btn-soft btn-sm rest-parent" data-act="parent">${Art.I.parent} Orang Tua</button>
+    </main>`);
+    setTimeout(() => Sound.say(title + ' ' + msg), 300);
+    return { el };
+  }
+
+  return { start, status, blocked, addBonus, usedToday, fmt, restScreen, isBedtime, LIMITS, BEDTIMES, _tick: tick, _rec: rec };
 })();
 
 /* =========================================================
@@ -2504,6 +2631,24 @@ const Parent = (() => {
       } }] });
   }
 
+  /* ---- Kartu waktu bermain ---- */
+  function timeCard() {
+    const lim = Number(Store.settings.playLimit) || 0, bed = Number(Store.settings.bedtime) || 0;
+    return `<section class="p-card" id="time-card"><h2><span class="ico">⏰</span>Waktu Bermain</h2>
+      <div class="field"><span>Batas waktu per hari (berlaku untuk setiap anak)</span>
+        <div class="seg">${PlayTime.LIMITS.map(m => `<button data-limit="${m}" class="${m === lim ? 'on' : ''}">${m ? m + ' menit' : 'Tanpa batas'}</button>`).join('')}</div></div>
+      <div class="field"><span>Jam tidur (TIQO istirahat sampai pukul 05.00)</span>
+        <div class="seg">${PlayTime.BEDTIMES.map(hh => `<button data-bed="${hh}" class="${hh === bed ? 'on' : ''}">${hh ? hh + '.00' : 'Mati'}</button>`).join('')}</div></div>
+      <div style="margin-top:12px">${Store.profiles.map(p => {
+        const st = PlayTime.status(p.id), total = (st.limit + st.bonus) / 60;
+        const info = `Hari ini: ${PlayTime.fmt(st.used)}${st.limit ? ` dari ${total} menit` : ''}${st.reason === 'limit' ? ' · waktu habis' : st.reason === 'bedtime' ? ' · jam tidur' : ''}`;
+        return `<div class="prof-item"><span class="avatar">${esc(p.avatar)}</span><div class="nm"><b>${esc(p.nickname)}</b><small>${info}</small></div>
+          <div class="acts">${st.limit ? `<button data-bonus="${p.id}" aria-label="Tambah 10 menit untuk ${esc(p.nickname)}">+10 menit</button>` : ''}</div></div>`;
+      }).join('')}</div>
+      <p class="note">Waktu dihitung hanya saat TIQO terbuka di layar anak. Dua menit sebelum habis, maskot mengingatkan anak. Jika waktu habis di tengah misi, anak boleh menyelesaikan misinya dulu. Tambahan waktu hanya berlaku hari ini${bed ? ', dan tidak berlaku pada jam tidur' : ''}.</p>
+    </section>`;
+  }
+
   /* ---- Halaman utama orang tua ---- */
   function screen() {
     if (!unlocked()) { setTimeout(open, 0); return App.redirect('/home'); }
@@ -2535,6 +2680,8 @@ const Parent = (() => {
           : '<p class="note">Belum ada misi yang diselesaikan di profil ini.</p>'}
         <p class="note">Ringkasan ini hanya catatan aktivitas bermain di perangkat ini, bukan penilaian kemampuan atau perkembangan anak.</p>
       </section>
+
+      ${timeCard()}
 
       <section class="p-card"><h2><span class="ico">🔊</span>Suara</h2>
         <button class="toggle" data-toggle="narration"><span><b>Suara pemandu</b><small>Membacakan instruksi untuk anak</small></span>${sw('narration', S.narration)}</button>
@@ -2593,6 +2740,13 @@ const Parent = (() => {
       if (d.toggle) { Store.setSetting(d.toggle, !Store.settings[d.toggle]); U.$(`[data-sw="${d.toggle}"]`, el).classList.toggle('on', Store.settings[d.toggle]); UI.toast('Tersimpan'); if (d.toggle === 'narration' && !Store.settings.narration) Sound.stop(); }
       if (d.rate) { Store.setSetting('rate', d.rate); U.$$('[data-rate]', el).forEach(x => x.classList.toggle('on', x === t)); UI.toast('Tersimpan'); }
       if ('test' in d) { if (!Store.settings.narration) UI.toast('Suara pemandu sedang mati'); Sound.play('right'); Sound.say('Halo! Aku bintang TIQO. Ayo bermain, belajar, dan bertualang!'); }
+      if (d.limit !== undefined || d.bed !== undefined || d.bonus) {
+        if (d.limit !== undefined) Store.setSetting('playLimit', Number(d.limit));
+        if (d.bed !== undefined) Store.setSetting('bedtime', Number(d.bed));
+        if (d.bonus) PlayTime.addBonus(d.bonus, 10);
+        U.$('#time-card', el).outerHTML = timeCard();
+        UI.toast(d.bonus ? 'Waktu ditambah 10 menit untuk hari ini' : 'Tersimpan');
+      }
       if ('saveSchool' in d) { Store.setSetting('schoolLine', U.$('#sch-line', el).value.trim()); Store.setSetting('schoolName', U.$('#sch-name', el).value.trim()); UI.toast('Nama sekolah tersimpan'); }
       if (d.pick) { Store.setSetting('activeProfileId', d.pick); App.render(); UI.toast('Profil dipilih'); }
       if (d.edit) profileForm(Store.profiles.find(p => p.id === d.edit));
@@ -2641,7 +2795,8 @@ const App = (() => {
     [/^\/island\/([\w-]+)$/, m => Screens.island({ id: m[1] })],
     [/^\/play\/([\w-]+)$/, (m, q) => Screens.play({ id: m[1] }, q)],
     [/^\/result$/, () => Screens.result()],
-    [/^\/parent$/, () => Parent.screen()]
+    [/^\/parent$/, () => Parent.screen()],
+    [/^\/rest$/, () => PlayTime.restScreen()]
   ];
 
   function parse() {
@@ -2663,6 +2818,11 @@ const App = (() => {
     U.$$('.modal-wrap,.fb,.burst,.confetti').forEach(x => { if (!x.closest('#view')) x.remove(); });
     let { path, q } = parse();
     if (Store.profiles.length > 1 && !session.chosen && path !== '/who' && path !== '/parent') path = '/who';
+    // Waktu bermain habis / jam tidur → layar istirahat (Area Orang Tua & hasil misi tetap boleh dibuka)
+    if (path !== '/who' && Store.active() && PlayTime.blocked(Store.active().id) && !['/parent', '/rest', '/result'].includes(path)) {
+      path = '/rest'; history.replaceState(null, '', '#/rest');
+    }
+    if (!path.startsWith('/play')) U.$$('.time-banner').forEach(x => x.remove());
     let res = null;
     for (const [re, fn] of ROUTES) { const m = path.match(re); if (m) { res = fn(m, q); break; } }
     if (!res) { if (redirected) return go(redirected, true); return go('/home', true); }
@@ -2711,6 +2871,7 @@ const App = (() => {
     splash.classList.add('hide'); setTimeout(() => splash.remove(), 600);
   };
   if (Store.profiles.length <= 1) App.session.chosen = true;
+  PlayTime.start();
   // Saat aplikasi dibuka ulang, jangan langsung masuk area orang tua atau halaman hasil
   if (/^#\/(parent|result)/.test(location.hash)) history.replaceState(null, '', '#/home');
   App.render();
