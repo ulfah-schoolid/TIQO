@@ -574,11 +574,22 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
 .prompt:has(.habit-title){flex-direction:column;gap:10px}
 .prompt:has(.habit-title) .seq{margin-top:0!important}
 
+/* Layar hasil: tombol tidak terpotong di HP kecil */
+.result .actions .two .btn{padding:0 10px;gap:8px;white-space:nowrap;font-size:18px}
+@media (max-height:820px){
+  .result{padding-top:8px}
+  .result .m{width:120px;height:120px}
+  .result h1{font-size:28px}
+  .result-stars{margin:12px 0 2px}
+  .result-stars svg{width:60px;height:60px}
+  .result .summary{margin:10px 0}
+}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.5.0 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.5.1 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -615,7 +626,7 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.5.0',
+  version: '1.5.1',
   // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
   developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,

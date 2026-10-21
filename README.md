@@ -1,6 +1,6 @@
 # TIQO — Bermain, Belajar, Bertualang
 
-PWA permainan edukasi untuk anak usia 4–6 tahun. Versi 1.5.0.
+PWA permainan edukasi untuk anak usia 4–6 tahun. Versi 1.5.1.
 
 ## Isi folder
 
@@ -67,6 +67,7 @@ Kode disusun per bagian bernomor: 1 Konfigurasi · 2 Bank konten · 3 Utilitas �
 
 ## Riwayat versi
 
+- **1.5.1** — Perbaikan tampilan layar hasil misi di HP kecil (tombol "Main Lagi" tidak terpotong).
 - **1.5.0** — Pulau Kebiasaan: 7 misi urutan kebiasaan baik + hadiah Anak Rajin. Perbaikan: pesan "coba lagi" tidak lagi menutup pesan benar pada soal berikutnya.
 - **1.4.0** — Pulau Bahasa: 8 misi kosakata bahasa Inggris + hadiah Jago Bahasa.
 - **1.3.0** — Pulau Kode: 6 misi coding untuk anak + hadiah Ahli Kode.
