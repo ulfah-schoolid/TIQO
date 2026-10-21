@@ -1,6 +1,6 @@
 # TIQO — Bermain, Belajar, Bertualang
 
-PWA permainan edukasi untuk anak usia 4–6 tahun. Versi 1.4.0.
+PWA permainan edukasi untuk anak usia 4–6 tahun. Versi 1.5.0.
 
 ## Isi folder
 
@@ -26,18 +26,20 @@ Semua berkas harus berada di **folder yang sama** (akar repositori).
 ## Fitur v1
 
 - Layar pembuka dengan logo resmi, nama sekolah (dapat diubah/dimatikan).
-- Beranda: Misi Hari Ini (dipilih otomatis per anak per hari), 7 pulau, ringkasan bintang.
+- Beranda: Misi Hari Ini (dipilih otomatis per anak per hari), 8 pulau, ringkasan bintang.
 - Peta Kepulauan Ajaib dan halaman tiap pulau.
-- 60 misi di 7 pulau: Huruf (10), Angka (12), Taman Warna (7), Logika (8), Kode (6), Bahasa (8), Hijaiyah (9).
+- 67 misi di 8 pulau: Huruf (10), Angka (12), Taman Warna (7), Logika (8), Kode (6), Bahasa (8), Kebiasaan (7), Hijaiyah (9).
 - Pulau Kode (baru di v1.3.0): menyusun kartu panah agar bintang sampai ke portal — langkah pertama,
   urutan langkah, menghindari batu, memperbaiki kode (debugging), dan perulangan ×2/×3.
 - Pulau Bahasa (baru di v1.4.0): kosakata bahasa Inggris — hewan, buah, benda, warna, angka 1–5,
   kartu kata kembar, dan sapaan (Hello, Thank you, dst.). Kata Inggris dibacakan dengan suara Inggris dari HP,
   lalu muncul artinya dalam bahasa Indonesia.
+- Pulau Kebiasaan (baru di v1.5.0): menyusun urutan langkah cuci tangan, sikat gigi, makan, berwudhu,
+  berangkat sekolah, waktu tidur, dan menanam bunga, plus tebak langkah berikutnya. Isi urutan ada di `CONTENT.HABITS` (bagian 2).
 - Jenis permainan: pilihan ganda, mengurutkan, temukan semua, kartu memori, bantu hitung,
   dan menebalkan dengan jari (A–Z, 0–9, hijaiyah) — baru di v1.1.0.
 - Suara pemandu otomatis (bahasa Indonesia, dari perangkat) + efek suara lembut.
-- Bintang 1–3 per misi, 14 hadiah di Galeri Bintang.
+- Bintang 1–3 per misi, 15 hadiah di Galeri Bintang.
 - Beberapa profil anak dengan progres terpisah (tanpa email/kata sandi).
 - Area Orang Tua dengan gerbang (soal hitungan + tahan tombol): progres, waktu bermain, suara,
   sekolah, profil, unduh/pulihkan cadangan, hapus data.
@@ -65,6 +67,7 @@ Kode disusun per bagian bernomor: 1 Konfigurasi · 2 Bank konten · 3 Utilitas �
 
 ## Riwayat versi
 
+- **1.5.0** — Pulau Kebiasaan: 7 misi urutan kebiasaan baik + hadiah Anak Rajin. Perbaikan: pesan "coba lagi" tidak lagi menutup pesan benar pada soal berikutnya.
 - **1.4.0** — Pulau Bahasa: 8 misi kosakata bahasa Inggris + hadiah Jago Bahasa.
 - **1.3.0** — Pulau Kode: 6 misi coding untuk anak + hadiah Ahli Kode.
 - **1.2.0** — Pengatur waktu bermain & jam tidur di Area Orang Tua.

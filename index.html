@@ -545,11 +545,40 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
 /* Pulau Bahasa: kata Inggris pada kartu memori */
 .mcard .etxt{font-family:var(--font-display);font-weight:600;font-size:clamp(15px,4.6vw,22px);color:var(--primary);line-height:1.1;text-align:center;word-break:keep-all}
 
+/* Pulau Kebiasaan: urutan langkah */
+.habit-title{flex-direction:row;gap:12px;padding:8px 20px;min-width:0}
+.habit-title .emo{font-size:34px}
+.habit-title .word{font-size:21px}
+.order-slots.steps .slot small{font-family:var(--font-display);font-weight:600;font-size:22px;color:#B7A8E6}
+.order-slots.steps .slot .emo{font-size:32px}
+.order-pool.steps{flex-direction:column;flex-wrap:nowrap;align-items:stretch;width:100%;max-width:440px;align-self:center;gap:8px}
+.order-item.step{width:100%;height:auto;min-height:58px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;padding:8px 18px;border-radius:20px;text-align:left}
+.order-item.step .emo{font-size:30px;flex:none}
+.order-item.step .lbl{font-family:var(--font-display);font-weight:600;font-size:19px;line-height:1.2}
+.order-pool.steps .order-item.used{display:none}
+.order-pool.steps{margin-top:14px}
+@media (max-height:720px){
+  .order-slots .slot{width:48px;height:48px;border-radius:14px}
+  .order-slots.steps .slot small{font-size:18px}
+  .order-item.step{min-height:48px;padding:5px 14px;border-radius:16px}
+  .order-item.step .emo{font-size:26px}.order-item.step .lbl{font-size:17px}
+  .order-pool.steps{gap:6px;margin-top:8px}
+  .habit-title{padding:4px 16px}.habit-title .emo{font-size:26px}.habit-title .word{font-size:18px}
+}
+@media (orientation:landscape) and (max-height:560px){
+  .order-pool.steps{display:grid;grid-template-columns:repeat(3,1fr);grid-column:1/-1;max-width:none;margin-top:0}
+  .order-item.step{min-height:44px;padding:4px 10px;gap:8px}
+  .order-item.step .lbl{font-size:15px}.order-item.step .emo{font-size:24px}
+}
+.prompt:has(.habit-title){min-height:0;flex:none}
+.prompt:has(.habit-title){flex-direction:column;gap:10px}
+.prompt:has(.habit-title) .seq{margin-top:0!important}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.4.0 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.5.0 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -586,7 +615,7 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.4.0',
+  version: '1.5.0',
   // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
   developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,
@@ -613,6 +642,8 @@ const TIQO_CONFIG = Object.freeze({
       bg:'#EDF3FE', band:'#D3E3FB', edge:'#A5C2EF', grass:'#BCD3F6' },
     { id:'bahasa',   name:'Pulau Bahasa',   short:'Bahasa',   goal:'Mengenal kosakata dan sapaan bahasa Inggris lewat mendengar dan bermain.',
       bg:'#FEF1F4', band:'#FAD9E2', edge:'#EFABBE', grass:'#F7C2D0' },
+    { id:'kebiasaan',name:'Pulau Kebiasaan',short:'Kebiasaan',goal:'Menyusun urutan kebiasaan baik sehari-hari: cuci tangan, sikat gigi, wudhu, dan lainnya.',
+      bg:'#FFF3EA', band:'#FFDFC4', edge:'#F2BC8F', grass:'#FFD2AA' },
     { id:'hijaiyah', name:'Pulau Hijaiyah', short:'Hijaiyah', goal:'Mengenal dan menebalkan huruf hijaiyah, serta ucapan baik sehari-hari.',
       bg:'#E9F6F5', band:'#CDEDEA', edge:'#93D3CC', grass:'#A9E2D6' }
   ]
@@ -759,7 +790,18 @@ const CONTENT = (() => {
     { en:'Please', id:'Tolong', ic:'🙏', situasi:'Minta tolong dengan sopan. Kita mengucapkan apa?' }
   ];
 
-  return { EN, EN_NUMS, EN_COLORS, GREETINGS, WORDS, NUM_WORDS, COUNT_OBJS, COLORS, COLOR_OBJECTS, SHAPES, CATEGORIES, PICS, PATTERN_SETS, HIJAIYAH, UCAPAN,
+  // Kebiasaan baik: urutan langkah sudah dipastikan tidak ambigu. Tiap langkah: [label, emoji]
+  const HABITS = [
+    { id:'cuci', title:'Cuci tangan', ic:'🧼', steps:[['Basahi tangan','💧'],['Pakai sabun','🧼'],['Gosok tangan','👐'],['Bilas dengan air','🚿'],['Keringkan tangan','🧻']] },
+    { id:'gigi', title:'Sikat gigi', ic:'🪥', steps:[['Ambil sikat gigi','🪥'],['Sikat semua gigi','🦷'],['Kumur dengan air','💦'],['Tersenyum','😁']] },
+    { id:'makan', title:'Makan', ic:'🍚', steps:[['Cuci tangan','🧼'],['Baca Bismillah','🤲'],['Makan dengan tangan kanan','🍚'],['Ucap Alhamdulillah','😋']] },
+    { id:'wudhu', title:'Berwudhu', ic:'💧', steps:[['Baca Bismillah','🤲'],['Basuh wajah','🙂'],['Basuh tangan sampai siku','💪'],['Usap kepala','👦'],['Basuh kaki','🦶']] },
+    { id:'pagi', title:'Berangkat sekolah', ic:'🎒', steps:[['Bangun tidur','⏰'],['Mandi','🛁'],['Pakai seragam','👕'],['Pakai sepatu','👟'],['Berangkat sekolah','🎒']] },
+    { id:'tidur', title:'Waktu tidur', ic:'🌙', steps:[['Sikat gigi','🪥'],['Berbaring di kasur','🛏️'],['Berdoa sebelum tidur','🤲'],['Tidur nyenyak','😴']] },
+    { id:'tanam', title:'Menanam bunga', ic:'🌻', steps:[['Siapkan pot dan tanah','🪴'],['Tanam bijinya','🌰'],['Siram dengan air','💧'],['Tunas tumbuh','🌱'],['Bunga mekar','🌻']] }
+  ].map(h => ({ ...h, steps: h.steps.map(([label, emo]) => ({ label, emo })) }));
+
+  return { HABITS, EN, EN_NUMS, EN_COLORS, GREETINGS, WORDS, NUM_WORDS, COUNT_OBJS, COLORS, COLOR_OBJECTS, SHAPES, CATEGORIES, PICS, PATTERN_SETS, HIJAIYAH, UCAPAN,
     colorById: id => COLORS.find(c => c.id === id),
     shapeById: id => SHAPES.find(s => s.id === id) };
 })();
@@ -946,6 +988,13 @@ const Art = (() => {
       <rect x="10" y="54" width="36" height="36" rx="9" fill="#8ED8C6" stroke="#3E9E87" stroke-width="2.5"/>
       <path d="M38 72 H20 M27 64 L19 72 L27 80" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
       <polygon points="${starPts(72, 73, 17, 8)}" fill="#FFD66B" stroke="#C9971B" stroke-width="2.5"/></g>`,
+    kebiasaan: `<g stroke-linejoin="round">
+      <rect x="8" y="52" width="52" height="34" rx="14" fill="#8ED8C6" stroke="#3E9E87" stroke-width="2.5"/>
+      <rect x="16" y="58" width="36" height="12" rx="6" fill="#fff" opacity=".6"/>
+      <circle cx="28" cy="40" r="9" fill="#fff" stroke="#9ED3F3" stroke-width="2.5"/><circle cx="46" cy="34" r="6" fill="#fff" stroke="#9ED3F3" stroke-width="2.5"/><circle cx="38" cy="22" r="5" fill="#fff" stroke="#9ED3F3" stroke-width="2.5"/>
+      <path d="M78 10 C86 26 92 34 92 44 a14 14 0 0 1 -28 0 C64 34 70 26 78 10z" fill="#9ED3F3" stroke="#2F7DB8" stroke-width="2.5"/>
+      <path d="M72 46 a7 7 0 0 0 6 7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="${starPts(78, 76, 15, 7)}" fill="#FFD66B" stroke="#C9971B" stroke-width="2.5"/></g>`,
     bahasa: `<g stroke-linejoin="round">
       <path d="M10 14 h50 a8 8 0 0 1 8 8 v22 a8 8 0 0 1 -8 8 h-26 l-14 12 v-12 h-10 a8 8 0 0 1 -8 -8 v-22 a8 8 0 0 1 8 -8z" fill="#9ED3F3" stroke="#2F7DB8" stroke-width="2.5"/>
       <text x="38" y="35" text-anchor="middle" dominant-baseline="central" font-family="Fredoka,Nunito,sans-serif" font-weight="700" font-size="24" fill="#fff">Hi!</text>
@@ -1845,6 +1894,47 @@ const Gen = (() => {
       return [{ kind: 'memory', say, hint: 'Ingat-ingat letak kartunya, ya.', cols: pairs <= 3 ? 3 : (pairs <= 4 ? 4 : 4), cards: shuffle(cards) }];
     },
 
+    /* ---------------- KEBIASAAN BAIK ---------------- */
+    habitOrder({ routines, len = 0 }, rounds) {
+      const hs = targets(routines.map(id => C.HABITS.find(h => h.id === id)), rounds);
+      return hs.map(h => {
+        const n = h.steps.length, take = len && len < n ? len : n;
+        // Ambil langkah secara berurutan (selalu termasuk langkah pertama dan terakhir)
+        let idx = Array.from({ length: n }, (_, i) => i);
+        if (take < n) { const mid = sample(idx.slice(1, -1), take - 2); idx = [0, ...mid, n - 1].sort((a, b) => a - b); }
+        let items = shuffle(idx);
+        while (items.every((v, k) => v === idx[k])) items = shuffle(idx);
+        return {
+          kind: 'order', steps: true,
+          say: `Urutkan langkah ${h.title.toLowerCase()}. Mana yang pertama?`,
+          prompt: `<div class="prompt-card habit-title"><span class="emo">${h.ic}</span><span class="word">${U.esc(h.title)}</span></div>`,
+          hint: 'Apa yang dilakukan paling awal? Ayo pikirkan lagi.',
+          reveal: `Begitulah urutan ${h.title.toLowerCase()}`,
+          answer: idx,
+          items: items.map(v => { const s = h.steps[v];
+            return { value: v, name: s.label, say: s.label, slotHtml: `<span class="emo">${s.emo}</span>`,
+              html: `<span class="emo">${s.emo}</span><span class="lbl">${U.esc(s.label)}</span>` }; })
+        };
+      });
+    },
+    habitNext({ routines, n = 3 }, rounds) {
+      const hs = targets(routines.map(id => C.HABITS.find(h => h.id === id)), rounds);
+      return hs.map(h => {
+        const k = ri(1, h.steps.length - 1), right = h.steps[k];
+        const others = h.steps.filter((_, i) => i !== k);
+        const ds = sample(others, n - 1);
+        const cells = h.steps.slice(0, k).map(s => `<span class="cell"><span class="emo">${s.emo}</span></span>`).join('') + '<span class="cell q">?</span>';
+        return choice({
+          cols: 1,
+          say: `Kita sedang ${h.title.toLowerCase()}. Apa langkah selanjutnya?`,
+          prompt: `<div class="prompt-card habit-title"><span class="emo">${h.ic}</span><span class="word">${U.esc(h.title)}</span></div><div class="seq" style="margin-top:10px">${cells}</div>`,
+          hint: 'Lihat langkah yang sudah dilakukan. Apa yang berikutnya?',
+          reveal: `Selanjutnya: ${right.label}`,
+          options: [opt.text(right.label, right.emo, true), ...ds.map(d => opt.text(d.label, d.emo, false))]
+        });
+      });
+    },
+
     /* ---------------- BAHASA INGGRIS ---------------- */
     engHear({ pool = 'animals', n = 3 }, rounds) {
       const set = enPool(pool);
@@ -2064,6 +2154,14 @@ const MISSIONS = [
   { id:'bahasa-6', island:'bahasa', title:'Kata Apa Ini?',       goal:'Memilih kata Inggris yang cocok dengan gambar', level:2, gen:'engSee', params:{pool:'animals+fruits', n:3}, rounds:5 },
   { id:'bahasa-7', island:'bahasa', title:'Kartu Kata Kembar',   goal:'Mencocokkan gambar dengan kata Inggris',   level:2, gen:'memory',   params:{pairs:4, set:'en'}, rounds:1 },
   { id:'bahasa-8', island:'bahasa', title:'Hello! Thank you!',   goal:'Mengenal sapaan dan ucapan sehari-hari',   level:2, gen:'engGreet', params:{n:3}, rounds:5 },
+  // Pulau Kebiasaan
+  { id:'kebiasaan-1', island:'kebiasaan', title:'Hidup Bersih',        goal:'Mengurutkan 3 langkah cuci tangan, sikat gigi, dan makan', level:1, gen:'habitOrder', params:{routines:['cuci','gigi','makan'], len:3}, rounds:3 },
+  { id:'kebiasaan-2', island:'kebiasaan', title:'Apa Selanjutnya?',    goal:'Menebak langkah berikutnya dalam sebuah kebiasaan',        level:1, gen:'habitNext',  params:{routines:['cuci','gigi','makan','pagi','tidur','tanam'], n:3}, rounds:5 },
+  { id:'kebiasaan-3', island:'kebiasaan', title:'Pagi sampai Malam',   goal:'Mengurutkan 3 langkah kegiatan harian',                    level:1, gen:'habitOrder', params:{routines:['pagi','tidur','tanam'], len:3}, rounds:3 },
+  { id:'kebiasaan-4', island:'kebiasaan', title:'Rutinitas Lengkap',   goal:'Mengurutkan semua langkah kebiasaan baik',                 level:2, gen:'habitOrder', params:{routines:['cuci','gigi','makan','tidur']}, rounds:3 },
+  { id:'kebiasaan-5', island:'kebiasaan', title:'Ayo Berwudhu',        goal:'Mengurutkan langkah berwudhu',                             level:2, gen:'habitOrder', params:{routines:['wudhu']}, rounds:1 },
+  { id:'kebiasaan-6', island:'kebiasaan', title:'Hari yang Hebat',     goal:'Mengurutkan langkah berangkat sekolah, menanam, dan sikat gigi', level:2, gen:'habitOrder', params:{routines:['pagi','tanam','gigi']}, rounds:3 },
+  { id:'kebiasaan-7', island:'kebiasaan', title:'Apa Selanjutnya Lagi?',goal:'Menebak langkah berikutnya, termasuk wudhu',              level:2, gen:'habitNext',  params:{routines:['cuci','gigi','makan','wudhu','pagi','tidur','tanam'], n:3}, rounds:5 },
   // Pulau Hijaiyah
   { id:'hijaiyah-1',island:'hijaiyah',title:'Alif sampai Kho', goal:'Mengenal huruf hijaiyah ا–خ',           level:1, gen:'pickHijaiyah', params:{from:0,to:6,n:3,mode:'see'}, rounds:5 },
   { id:'hijaiyah-2',island:'hijaiyah',title:'Dal sampai Dhod', goal:'Mengenal huruf hijaiyah د–ض',           level:1, gen:'pickHijaiyah', params:{from:7,to:14,n:3,mode:'see'}, rounds:5 },
@@ -2088,6 +2186,7 @@ function validateRounds(rounds) {
       if (!r.items.some(i => i.correct)) return false;
     } else if (r.kind === 'order') {
       if (r.items.length !== r.answer.length) return false;
+      if (r.steps && r.answer.some((v, k) => k && v <= r.answer[k - 1])) return false;
     } else if (r.kind === 'code') {
       if (!r.puzzle || r.puzzle.solution.length > r.slots) return false;
       if (Code.simulate(r.puzzle, r.puzzle.solution).end !== 'goal') return false;
@@ -2395,6 +2494,7 @@ const Rewards = (() => {
     { id:'logika',   name:'Penemu Pola',       desc:'Selesaikan semua misi Pulau Logika.',       color:'#E8E0FA', icon:'logika',   progress: s => [s.perIsland.logika.done, s.perIsland.logika.total] },
     { id:'kode',     name:'Ahli Kode',         desc:'Selesaikan semua misi Pulau Kode.',         color:'#D3E3FB', icon:'kode',     progress: s => [s.perIsland.kode.done, s.perIsland.kode.total] },
     { id:'bahasa',   name:'Jago Bahasa',       desc:'Selesaikan semua misi Pulau Bahasa.',       color:'#FAD9E2', icon:'bahasa',   progress: s => [s.perIsland.bahasa.done, s.perIsland.bahasa.total] },
+    { id:'kebiasaan',name:'Anak Rajin',        desc:'Selesaikan semua misi Pulau Kebiasaan.',    color:'#FFDFC4', icon:'kebiasaan',progress: s => [s.perIsland.kebiasaan.done, s.perIsland.kebiasaan.total] },
     { id:'hijaiyah', name:'Sahabat Hijaiyah',  desc:'Selesaikan semua misi Pulau Hijaiyah.',     color:'#CDEDEA', icon:'hijaiyah', progress: s => [s.perIsland.hijaiyah.done, s.perIsland.hijaiyah.total] },
     { id:'pulau',    name:'Penjelajah Pulau',  desc:'Mainkan minimal 1 misi di setiap pulau.',   color:'#BDE7F5', icon:'star',     progress: s => [TIQO_CONFIG.islands.filter(i => s.perIsland[i.id].done > 0).length, TIQO_CONFIG.islands.length] },
     { id:'harian',   name:'Rajin Bertualang',  desc:'Selesaikan 3 Misi Hari Ini.',               color:'#FFE08A', icon:'star',     progress: s => [Math.min(s.dailyCount, 3), 3] },
@@ -2604,6 +2704,7 @@ const Engine = (() => {
 
     function hideFb() { fb.classList.remove('show'); }
     function showOk(text, sub, onNext) {
+      clearTimeout(tryT); // jangan biarkan pewaktu pesan "coba lagi" menutup pesan benar
       Sound.play('right'); U.vibrate(25);
       fb.className = 'fb ok';
       fb.innerHTML = `<div class="m">${Art.mascot(Math.random() < .5 ? 'semangat' : 'kedip')}</div>
@@ -2693,20 +2794,20 @@ const Engine = (() => {
 
     /* ---- Mengurutkan ---- */
     function doOrder(r) {
-      const slots = U.h(`<div class="order-slots">${r.answer.map(() => '<span class="slot"></span>').join('')}</div>`);
-      const pool = U.h('<div class="order-pool"></div>');
+      const slots = U.h(`<div class="order-slots ${r.steps ? 'steps' : ''}">${r.answer.map((_, k) => `<span class="slot">${r.steps ? `<small>${k + 1}</small>` : ''}</span>`).join('')}</div>`);
+      const pool = U.h(`<div class="order-pool ${r.steps ? 'steps' : ''}"></div>`);
       let pos = 0, miss = 0;
       r.items.forEach(it => {
-        const b = U.h(`<button class="order-item" aria-label="Angka ${it.value}">${it.html}</button>`);
+        const b = U.h(`<button class="order-item ${r.steps ? 'step' : ''}" aria-label="${U.esc(it.name || 'Angka ' + it.value)}">${it.html}</button>`);
         b.onclick = () => {
           if (b.classList.contains('used')) return;
           if (it.value === r.answer[pos]) {
-            const s = slots.children[pos]; s.classList.add('filled'); s.innerHTML = it.html;
-            b.classList.add('used'); Sound.play('tap'); Sound.say(CONTENT.NUM_WORDS[it.value] || String(it.value));
+            const s = slots.children[pos]; s.classList.add('filled'); s.innerHTML = it.slotHtml || it.html;
+            b.classList.add('used'); Sound.play('tap'); if (!r.steps || pos + 1 < r.answer.length) Sound.say(it.say || CONTENT.NUM_WORDS[it.value] || String(it.value));
             pos++;
-            if (pos === r.answer.length) done(miss === 0 ? 1 : miss <= 2 ? .5 : .2, null, 'Urutannya sudah benar');
+            if (pos === r.answer.length) done(miss === 0 ? 1 : miss <= 2 ? .5 : .2, null, r.reveal || 'Urutannya sudah benar');
           } else {
-            miss++; b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong'); showTry(r.hint);
+            miss++; b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong'); showTry(r.steps && pos > 0 ? 'Langkah apa yang dilakukan setelah itu?' : r.hint);
           }
         };
         pool.appendChild(b);
