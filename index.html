@@ -504,11 +504,49 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
 .rest-tip{margin:18px auto 0;max-width:320px;font-weight:700;color:var(--ink-2);background:rgba(255,255,255,.7);border-radius:16px;padding:10px 14px}
 .rest-parent{margin-top:26px}
 
+/* ---------- Pulau Kode ---------- */
+.code-host{flex:1;display:flex;justify-content:center}
+.code{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.code-board{position:relative;display:grid;grid-template-columns:repeat(var(--n),1fr);grid-template-rows:repeat(var(--n),1fr);
+  border-radius:24px;overflow:hidden;background:#DDF1D8;box-shadow:0 5px 0 #B5DDAB,var(--shadow)}
+.code-cell{position:relative;display:grid;place-items:center;background:#E9F7E4;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75)}
+.code-cell.alt{background:#DDF1D8}
+.code-cell svg{width:72%;height:72%}
+.code-goal{width:82%;animation:bob 2.4s ease-in-out infinite}
+.code-hero{position:absolute;left:0;top:0;width:calc(100% / var(--n));height:calc(100% / var(--n));display:grid;place-items:center;
+  transition:transform .34s cubic-bezier(.3,1.3,.5,1);z-index:2;pointer-events:none}
+.code-hero svg{width:84%;height:84%}
+.code-hero.bump svg{animation:shake .45s}
+.code.win .code-board{box-shadow:0 0 0 5px #FFD45C,0 5px 0 #B5DDAB,var(--shadow)}
+.code-prog{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:56px;padding:8px 10px;background:rgba(255,255,255,.75);border-radius:20px;max-width:100%}
+.code-slot{width:46px;height:46px;border-radius:14px;border:2.5px dashed #C3B2EE;display:grid;place-items:center;font-weight:800;color:#C3B2EE;font-size:14px}
+.code-card{position:relative;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.15);transition:transform .12s}
+.code-card svg,.code-key svg{width:30px;height:30px}
+.code-card .rep{position:absolute;right:-6px;bottom:-6px;background:#FFD45C;color:#5A3D00;font-weight:800;font-size:13px;border-radius:999px;padding:1px 6px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.code-card.sel{outline:4px solid #FFD45C;outline-offset:2px}
+.code-card.now{transform:translateY(-6px) scale(1.08);box-shadow:0 0 0 4px #fff,0 6px 14px rgba(0,0,0,.2)}
+.code-card.bad{animation:shake .45s;outline:4px solid #F27A7A;outline-offset:2px}
+.code-pal{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.code-pal.loop{display:grid;grid-template-columns:repeat(6,1fr);width:100%;max-width:350px;gap:6px}
+.code-pal.loop .code-key{width:100%;height:54px}
+.code-key{width:60px;height:58px;border-radius:18px;display:grid;place-items:center;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.18);font-family:var(--font-display);font-weight:600;font-size:22px}
+.code-key:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.k-R{background:#3BA6D8}.k-L{background:#F08A4B}.k-U{background:#30A46C}.k-D{background:#8E6FD8}
+.k-rep{background:#FFE8A3;color:#6B4A00}
+.code-act{display:flex;gap:10px;justify-content:center;width:100%}
+.code-act .code-run{flex:1;max-width:240px}
+.code.running .code-pal,.code.running .code-act{opacity:.45;pointer-events:none}
+@media (orientation:landscape) and (max-height:560px){
+  .play-body .code-host{grid-column:1/-1}
+  .code{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:18px;align-items:center}
+  .code-board{grid-row:1/4}
+}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.2.0 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.3.0 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -545,7 +583,7 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.2.0',
+  version: '1.3.0',
   // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
   developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,
@@ -568,6 +606,8 @@ const TIQO_CONFIG = Object.freeze({
       bg:'#EEF8EB', band:'#DDF1D8', edge:'#A9D9A0', grass:'#B7E4AE' },
     { id:'logika',   name:'Pulau Logika',   short:'Logika',   goal:'Mengenali pola, melatih daya ingat, dan mengamati perbedaan.',
       bg:'#F4F0FD', band:'#E8E0FA', edge:'#C3B2EE', grass:'#D2C5F5' },
+    { id:'kode',     name:'Pulau Kode',     short:'Kode',     goal:'Menyusun langkah dan perintah untuk melatih logika berpikir.',
+      bg:'#EDF3FE', band:'#D3E3FB', edge:'#A5C2EF', grass:'#BCD3F6' },
     { id:'hijaiyah', name:'Pulau Hijaiyah', short:'Hijaiyah', goal:'Mengenal dan menebalkan huruf hijaiyah, serta ucapan baik sehari-hari.',
       bg:'#E9F6F5', band:'#CDEDEA', edge:'#93D3CC', grass:'#A9E2D6' }
   ]
@@ -867,6 +907,14 @@ const Art = (() => {
       <path d="M50 14 h36 v32 h-12 a6 6 0 1 0 -12 0 h-12 z" fill="#B9A3EE" stroke="#7E62C9"/>
       <path d="M14 52 h12 a6 6 0 1 0 12 0 h12 v34 h-36 z" fill="#8ED8C6" stroke="#3E9E87"/>
       <path d="M56 52 h30 v34 h-30 v-11 a6 6 0 1 0 0 -12 z" fill="#9ED3F3" stroke="#2F7DB8"/></g>`,
+    kode: `<g stroke-linejoin="round">
+      <rect x="10" y="12" width="36" height="36" rx="9" fill="#9ED3F3" stroke="#2F7DB8" stroke-width="2.5"/>
+      <path d="M18 30 H36 M29 22 L37 30 L29 38" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <rect x="54" y="12" width="36" height="36" rx="9" fill="#B9A3EE" stroke="#7E62C9" stroke-width="2.5"/>
+      <path d="M72 20 V38 M64 31 L72 39 L80 31" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <rect x="10" y="54" width="36" height="36" rx="9" fill="#8ED8C6" stroke="#3E9E87" stroke-width="2.5"/>
+      <path d="M38 72 H20 M27 64 L19 72 L27 80" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <polygon points="${starPts(72, 73, 17, 8)}" fill="#FFD66B" stroke="#C9971B" stroke-width="2.5"/></g>`,
     hijaiyah: `<path d="M74 10 a18 18 0 1 0 14 30 a14 14 0 1 1 -14 -30z" fill="#FFD66B" stroke="#C9971B" stroke-width="2"/>
       <polygon points="${starPts(84, 14, 5, 2.4)}" fill="#FFD66B"/>
       <rect x="10" y="44" width="80" height="44" rx="12" fill="#8ED8C6" stroke="#3E9E87" stroke-width="2.5"/>
@@ -1213,6 +1261,229 @@ const Trace = (() => {
 })();
 
 /* =========================================================
+   4c. PULAU KODE — coding untuk anak (tanpa mengetik)
+   Anak menyusun kartu panah agar bintang sampai ke portal Q.
+   Arah memakai arah mutlak (kanan/kiri/atas/bawah) agar mudah
+   dipahami anak 4–6 tahun.
+   Mode:
+     path : susun langkah (boleh ada batu)
+     fix  : kode sudah terisi tetapi ada satu panah yang salah
+     loop : slot terbatas, gunakan kartu ×2 / ×3 (perulangan)
+   Setiap teka-teki dibuat acak lalu diperiksa dengan BFS
+   sehingga PASTI bisa diselesaikan.
+   ========================================================= */
+const Code = (() => {
+  const DIRS = {
+    R: { dr: 0, dc: 1, name: 'kanan', rot: 0 },
+    D: { dr: 1, dc: 0, name: 'bawah', rot: 90 },
+    L: { dr: 0, dc: -1, name: 'kiri', rot: 180 },
+    U: { dr: -1, dc: 0, name: 'atas', rot: 270 }
+  };
+  const ORDER = ['U', 'L', 'R', 'D'];
+  const key = (r, c) => r + ',' + c;
+  const inB = (n, r, c) => r >= 0 && c >= 0 && r < n && c < n;
+
+  // ---- Pencarian jalur terpendek (BFS) ----
+  function bfs(n, start, goal, rocks) {
+    const prev = new Map([[key(...start), null]]), q = [start];
+    while (q.length) {
+      const [r, c] = q.shift();
+      if (r === goal[0] && c === goal[1]) {
+        const path = []; let k = key(r, c);
+        while (prev.get(k)) { const p = prev.get(k); path.unshift(p.d); k = p.from; }
+        return path;
+      }
+      for (const d of U.shuffle(ORDER)) {
+        const nr = r + DIRS[d].dr, nc = c + DIRS[d].dc, nk = key(nr, nc);
+        if (!inB(n, nr, nc) || rocks.has(nk) || prev.has(nk)) continue;
+        prev.set(nk, { from: key(r, c), d }); q.push([nr, nc]);
+      }
+    }
+    return null;
+  }
+  const rnd = n => [U.ri(0, n - 1), U.ri(0, n - 1)];
+  const expand = prog => prog.flatMap(b => Array(b.n || 1).fill(b.d));
+
+  // Jalankan program; kembalikan jejak langkah dan hasil
+  function simulate(p, prog) {
+    let [r, c] = p.start; const trail = [];
+    const steps = expand(prog);
+    for (let i = 0; i < steps.length; i++) {
+      const d = DIRS[steps[i]], nr = r + d.dr, nc = c + d.dc;
+      if (!inB(p.size, nr, nc)) return { trail, end: 'edge', at: [nr, nc] };
+      if (p.rocks.has(key(nr, nc))) return { trail, end: 'rock', at: [nr, nc] };
+      r = nr; c = nc; trail.push([r, c]);
+      if (r === p.goal[0] && c === p.goal[1]) return { trail, end: 'goal' };
+    }
+    return { trail, end: 'short' };
+  }
+
+  // ---- Generator teka-teki ----
+  function makePath({ size = 4, len = [2, 3], rocks = [0, 0], detour = false }) {
+    for (let t = 0; t < 400; t++) {
+      const start = rnd(size), rs = new Set(), k = U.ri(rocks[0], rocks[1]);
+      while (rs.size < k) { const x = rnd(size); if (key(...x) !== key(...start)) rs.add(key(...x)); }
+      const goal = rnd(size);
+      if (key(...goal) === key(...start) || rs.has(key(...goal))) continue;
+      const sol = bfs(size, start, goal, rs);
+      if (!sol || sol.length < len[0] || sol.length > len[1]) continue;
+      if (detour) { // batu harus benar-benar menghalangi jalan lurus
+        const man = Math.abs(goal[0] - start[0]) + Math.abs(goal[1] - start[1]);
+        const r0 = Math.min(start[0], goal[0]), r1 = Math.max(start[0], goal[0]), c0 = Math.min(start[1], goal[1]), c1 = Math.max(start[1], goal[1]);
+        const inBox = [...rs].some(s => { const [a, b] = s.split(',').map(Number); return a >= r0 && a <= r1 && b >= c0 && b <= c1; });
+        if (!(sol.length > man || inBox)) continue;
+      }
+      return { size, start, goal, rocks: rs, solution: sol.map(d => ({ d, n: 1 })) };
+    }
+    return null;
+  }
+  function makeLoop({ size = 5, segs = 2 }) {
+    for (let t = 0; t < 400; t++) {
+      const blocks = []; let last = null;
+      for (let i = 0; i < segs; i++) {
+        const opts = ORDER.filter(d => !last || (DIRS[d].dr !== 0) !== (DIRS[last].dr !== 0)); // tegak lurus
+        const d = U.pick(opts); blocks.push({ d, n: U.ri(2, 3) }); last = d;
+      }
+      const start = rnd(size); let [r, c] = start; const cells = new Set([key(r, c)]); let ok = true;
+      for (const s of expand(blocks)) { r += DIRS[s].dr; c += DIRS[s].dc; if (!inB(size, r, c) || cells.has(key(r, c))) { ok = false; break; } cells.add(key(r, c)); }
+      if (!ok) continue;
+      const rs = new Set(); let guard = 0;
+      while (rs.size < 1 && guard++ < 50) { const x = rnd(size); if (!cells.has(key(...x))) rs.add(key(...x)); }
+      return { size, start, goal: [r, c], rocks: rs, solution: blocks };
+    }
+    return null;
+  }
+  function makeFix(opts) {
+    for (let t = 0; t < 100; t++) {
+      const p = makePath(opts); if (!p) continue;
+      const prog = p.solution.map(b => ({ ...b })), i = U.ri(0, prog.length - 1);
+      prog[i] = { d: U.pick(ORDER.filter(d => d !== prog[i].d)), n: 1 };
+      if (simulate(p, prog).end === 'goal') continue;
+      return { ...p, prefill: prog };
+    }
+    return null;
+  }
+
+  /* ---- Gambar kecil ---- */
+  const arrow = (d, cls = '') => `<svg class="${cls}" viewBox="0 0 40 40" aria-hidden="true"><g transform="rotate(${DIRS[d].rot} 20 20)">
+    <path d="M8 20 H27 M20 11 L29 20 L20 29" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`;
+  const rockSvg = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 31 C5 24 9 16 15 13 C19 8 27 9 30 15 C35 18 36 26 33 31 Z" fill="#A89BB8" stroke="#7D7091" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M13 18 C15 15 19 14 21 15" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`;
+
+  /* ---- Widget ---- */
+  function mount(host, r, cb) {
+    const p = r.puzzle, loop = r.mode === 'loop', fix = r.mode === 'fix';
+    let prog = (r.mode === 'fix' ? p.prefill : []).map(b => ({ ...b })), sel = -1, running = false, done = false, fails = 0, dead = false;
+    const el = U.h(`<div class="code">
+      <div class="code-board" style="--n:${p.size}" role="img" aria-label="Papan permainan"></div>
+      <div class="code-prog" aria-label="Kode kamu"></div>
+      <div class="code-pal ${loop ? 'loop' : ''}">${ORDER.map(d => `<button class="code-key k-${d}" data-d="${d}" aria-label="Panah ${DIRS[d].name}">${arrow(d)}</button>`).join('')}
+        ${loop ? '<button class="code-key k-rep" data-rep="2" aria-label="Ulangi dua kali">×2</button><button class="code-key k-rep" data-rep="3" aria-label="Ulangi tiga kali">×3</button>' : ''}</div>
+      <div class="code-act"><button class="btn btn-white btn-sm" data-act-code="del" aria-label="Hapus kartu">⌫ Hapus</button>
+        <button class="btn btn-primary code-run" data-act-code="run">${Art.I.play} Jalankan</button></div>
+    </div>`);
+    host.appendChild(el);
+    const board = U.$('.code-board', el), progEl = U.$('.code-prog', el);
+
+    // Papan
+    let cells = '';
+    for (let rr = 0; rr < p.size; rr++) for (let cc = 0; cc < p.size; cc++) {
+      const k = key(rr, cc), g = rr === p.goal[0] && cc === p.goal[1];
+      cells += `<div class="code-cell ${(rr + cc) % 2 ? 'alt' : ''}">${p.rocks.has(k) ? rockSvg : ''}${g ? `<img class="code-goal" src="${ASSETS.q}" alt="Portal">` : ''}</div>`;
+    }
+    board.innerHTML = cells + `<div class="code-hero">${Art.mascot('senang')}</div>`;
+    const hero = U.$('.code-hero', board);
+    const place = ([rr, cc], instant) => {
+      hero.style.transition = instant ? 'none' : '';
+      hero.style.transform = `translate(${cc * 100}%, ${rr * 100}%)`;
+    };
+    place(p.start, true);
+
+    function layout() {
+      const S = Math.round(Math.max(180, Math.min(innerWidth - 32, 360, innerHeight - (innerHeight < 560 ? 160 : 458))));
+      board.style.width = board.style.height = S + 'px';
+    }
+    layout();
+
+    function renderProg() {
+      let html = '';
+      for (let i = 0; i < r.slots; i++) {
+        const b = prog[i];
+        html += b ? `<button class="code-card k-${b.d} ${i === sel ? 'sel' : ''}" data-i="${i}" aria-label="Kartu ${i + 1}: ${DIRS[b.d].name}${b.n > 1 ? ', ' + b.n + ' kali' : ''}">${arrow(b.d)}${b.n > 1 ? `<span class="rep">×${b.n}</span>` : ''}</button>`
+                  : `<span class="code-slot" aria-hidden="true">${i + 1}</span>`;
+      }
+      progEl.innerHTML = html;
+    }
+    renderProg();
+
+    el.addEventListener('click', e => {
+      if (running || done) return;
+      const card = e.target.closest('.code-card'), key_ = e.target.closest('[data-d]'), rep = e.target.closest('[data-rep]'), act = e.target.closest('[data-act-code]');
+      if (card) { const i = +card.dataset.i; sel = sel === i ? -1 : i; Sound.play('tap'); renderProg(); return; }
+      if (key_) {
+        const d = key_.dataset.d;
+        if (sel >= 0) { prog[sel] = { d, n: prog[sel].n || 1 }; sel = -1; }
+        else if (prog.length < r.slots) prog.push({ d, n: 1 });
+        else { UI.toast('Kotak kode sudah penuh. Sentuh kartu untuk menggantinya.'); Sound.play('soft'); return; }
+        Sound.play('tap'); Sound.say(DIRS[d].name); renderProg(); return;
+      }
+      if (rep) {
+        const i = sel >= 0 ? sel : prog.length - 1; if (i < 0) return;
+        const n = +rep.dataset.rep; prog[i].n = prog[i].n === n ? 1 : n; Sound.play('tap');
+        Sound.say(prog[i].n > 1 ? `${DIRS[prog[i].d].name}, ${CONTENT.NUM_WORDS[prog[i].n]} kali` : DIRS[prog[i].d].name); renderProg(); return;
+      }
+      if (act && act.dataset.actCode === 'del') {
+        if (!prog.length) return;
+        if (sel >= 0) { prog.splice(sel, 1); sel = -1; } else prog.pop();
+        Sound.play('tap'); renderProg(); return;
+      }
+      if (act && act.dataset.actCode === 'run') run();
+    });
+
+    async function run() {
+      if (!prog.length) { UI.toast('Pilih panah dulu, ya!'); Sound.say('Pilih panah dulu, ya!'); return; }
+      running = true; sel = -1; renderProg(); el.classList.add('running');
+      const res = simulate(p, prog), steps = expand(prog);
+      // peta langkah → kartu untuk sorotan
+      const owner = prog.flatMap((b, i) => Array(b.n || 1).fill(i));
+      place(p.start, true); await U.wait(200);
+      for (let i = 0; i < res.trail.length; i++) {
+        if (dead) return;
+        U.$$('.code-card', progEl).forEach((c, j) => c.classList.toggle('now', j === owner[i]));
+        place(res.trail[i]); Sound.play('flip'); await U.wait(380);
+      }
+      U.$$('.code-card', progEl).forEach(c => c.classList.remove('now'));
+      if (dead) return;
+      if (res.end === 'goal') {
+        done = true; el.classList.add('win'); hero.innerHTML = Art.mascot('rayakan');
+        cb.onDone(Math.max(0, fails - (fix ? 1 : 0)) === 0 ? 1 : (fails - (fix ? 1 : 0)) <= 2 ? .5 : .2, board);
+        return;
+      }
+      fails++;
+      const failIdx = owner[res.trail.length];
+      if (res.end === 'rock' || res.end === 'edge') {
+        hero.classList.remove('bump'); void hero.offsetWidth; hero.classList.add('bump');
+        if (failIdx !== undefined) { const c = U.$$('.code-card', progEl)[failIdx]; c && c.classList.add('bad'); }
+      }
+      const msg = res.end === 'rock' ? 'Ups, ada batu! Ubah kodenya, ya.' : res.end === 'edge' ? 'Ups, jalannya habis! Ubah kodenya, ya.' : 'Belum sampai ke portal. Tambah atau ubah panahnya, ya.';
+      cb.onFail(msg);
+      await U.wait(1300); if (dead) return;
+      hero.classList.remove('bump'); place(p.start, true);
+      U.$$('.code-card.bad', progEl).forEach(c => c.classList.remove('bad'));
+      running = false; el.classList.remove('running');
+    }
+
+    const onResize = () => !dead && layout();
+    window.addEventListener('resize', onResize);
+    const api = { el, destroy() { dead = true; window.removeEventListener('resize', onResize); }, _debug: () => ({ p, prog, done, fails }) };
+    Code._last = api;
+    return api;
+  }
+
+  return { makePath, makeLoop, makeFix, simulate, expand, mount, DIRS, _last: null };
+})();
+
+/* =========================================================
    5. MISI: GENERATOR SOAL + KATALOG
    Katalog (MISSIONS) hanya berisi data. Generator membuat soal
    dari bank konten dengan jawaban yang selalu dapat divalidasi.
@@ -1531,6 +1802,28 @@ const Gen = (() => {
       return [{ kind: 'memory', say, hint: 'Ingat-ingat letak kartunya, ya.', cols: pairs <= 3 ? 3 : (pairs <= 4 ? 4 : 4), cards: shuffle(cards) }];
     },
 
+    /* ---------------- KODE ---------------- */
+    code({ mode = 'path', size = 4, len = [2, 3], rocks = [0, 0], detour = false, segs = 2 }, rounds) {
+      const out = [];
+      for (let k = 0; k < rounds; k++) {
+        let puzzle = null, slots;
+        if (mode === 'loop') { puzzle = Code.makeLoop({ size, segs }); slots = segs; }
+        else if (mode === 'fix') { puzzle = Code.makeFix({ size, len, rocks, detour }); slots = puzzle && puzzle.solution.length; }
+        else { puzzle = Code.makePath({ size, len, rocks, detour }); slots = puzzle && (len[1] === 1 ? 1 : puzzle.solution.length + 1); }
+        if (!puzzle) continue;
+        const hasRock = puzzle.rocks.size > 0 && mode === 'path' && rocks[1] > 0;
+        out.push({ kind: 'code', mode, puzzle, slots,
+          say: mode === 'fix' ? 'Ada panah yang salah! Tekan Jalankan, lalu perbaiki panahnya.'
+             : mode === 'loop' ? 'Kotak kodenya sedikit! Pakai kartu kali dua atau kali tiga untuk mengulang langkah.'
+             : hasRock ? 'Bantu bintang ke portal. Hati-hati, jangan menabrak batu!'
+             : 'Bantu bintang ke portal! Pilih panahnya, lalu tekan Jalankan.',
+          hint: mode === 'fix' ? 'Sentuh kartu yang salah, lalu pilih panah yang benar.'
+              : mode === 'loop' ? 'Pilih panah, lalu sentuh kali dua atau kali tiga.'
+              : 'Hitung kotaknya dulu: ke kanan berapa, ke bawah berapa?' });
+      }
+      return out;
+    },
+
     /* ---------------- MENEBALKAN ---------------- */
     trace({ kind = 'latin', set = '', from = 0, to = 6 }, rounds) {
       if (kind === 'hijaiyah') {
@@ -1637,6 +1930,13 @@ const MISSIONS = [
   { id:'logika-6',island:'logika',title:'Bukan Kelompoknya',  goal:'Mengelompokkan benda sejenis',            level:2, gen:'oddOne',       params:{level:2}, rounds:5 },
   { id:'logika-7',island:'logika',title:'Tebak Bayangan',     goal:'Mencocokkan gambar dengan bayangannya',   level:2, gen:'shadow',       params:{n:3}, rounds:5 },
   { id:'logika-8',island:'logika',title:'Kartu Kembar Hebat', goal:'Melatih daya ingat (6 pasang)',           level:2, gen:'memory',       params:{pairs:6,set:'pics'}, rounds:1 },
+  // Pulau Kode
+  { id:'kode-1', island:'kode', title:'Langkah Pertama',  goal:'Memilih satu arah yang tepat',                level:1, gen:'code', params:{mode:'path', size:4, len:[1,1]}, rounds:4 },
+  { id:'kode-2', island:'kode', title:'Susun Langkah',    goal:'Menyusun urutan 2–3 langkah',                 level:1, gen:'code', params:{mode:'path', size:4, len:[2,3]}, rounds:4 },
+  { id:'kode-3', island:'kode', title:'Hindari Batu',     goal:'Merencanakan jalan memutari rintangan',       level:2, gen:'code', params:{mode:'path', size:5, len:[3,5], rocks:[2,3], detour:true}, rounds:4 },
+  { id:'kode-4', island:'kode', title:'Perbaiki Kode',    goal:'Menemukan dan memperbaiki langkah yang salah', level:2, gen:'code', params:{mode:'fix', size:4, len:[3,4], rocks:[1,2]}, rounds:3 },
+  { id:'kode-5', island:'kode', title:'Kode Ulangi',      goal:'Mengenal perulangan ×2 dan ×3',               level:2, gen:'code', params:{mode:'loop', size:5, segs:2}, rounds:3 },
+  { id:'kode-6', island:'kode', title:'Ulangi Hebat',     goal:'Memakai perulangan untuk jalan berbelok',     level:2, gen:'code', params:{mode:'loop', size:5, segs:3}, rounds:3 },
   // Pulau Hijaiyah
   { id:'hijaiyah-1',island:'hijaiyah',title:'Alif sampai Kho', goal:'Mengenal huruf hijaiyah ا–خ',           level:1, gen:'pickHijaiyah', params:{from:0,to:6,n:3,mode:'see'}, rounds:5 },
   { id:'hijaiyah-2',island:'hijaiyah',title:'Dal sampai Dhod', goal:'Mengenal huruf hijaiyah د–ض',           level:1, gen:'pickHijaiyah', params:{from:7,to:14,n:3,mode:'see'}, rounds:5 },
@@ -1661,6 +1961,9 @@ function validateRounds(rounds) {
       if (!r.items.some(i => i.correct)) return false;
     } else if (r.kind === 'order') {
       if (r.items.length !== r.answer.length) return false;
+    } else if (r.kind === 'code') {
+      if (!r.puzzle || r.puzzle.solution.length > r.slots) return false;
+      if (Code.simulate(r.puzzle, r.puzzle.solution).end !== 'goal') return false;
     } else if (r.kind === 'trace') {
       if (r.mode === 'path' && !(r.strokes && r.strokes.length)) return false;
       if (r.mode === 'mask' && !r.ch) return false;
@@ -1948,6 +2251,7 @@ const Rewards = (() => {
     { id:'angka',    name:'Jago Berhitung',    desc:'Selesaikan semua misi Pulau Angka.',        color:'#FFE8A3', icon:'angka',    progress: s => [s.perIsland.angka.done, s.perIsland.angka.total] },
     { id:'warna',    name:'Ahli Warna',        desc:'Selesaikan semua misi Taman Warna.',        color:'#DDF1D8', icon:'warna',    progress: s => [s.perIsland.warna.done, s.perIsland.warna.total] },
     { id:'logika',   name:'Penemu Pola',       desc:'Selesaikan semua misi Pulau Logika.',       color:'#E8E0FA', icon:'logika',   progress: s => [s.perIsland.logika.done, s.perIsland.logika.total] },
+    { id:'kode',     name:'Ahli Kode',         desc:'Selesaikan semua misi Pulau Kode.',         color:'#D3E3FB', icon:'kode',     progress: s => [s.perIsland.kode.done, s.perIsland.kode.total] },
     { id:'hijaiyah', name:'Sahabat Hijaiyah',  desc:'Selesaikan semua misi Pulau Hijaiyah.',     color:'#CDEDEA', icon:'hijaiyah', progress: s => [s.perIsland.hijaiyah.done, s.perIsland.hijaiyah.total] },
     { id:'pulau',    name:'Penjelajah Pulau',  desc:'Mainkan minimal 1 misi di setiap pulau.',   color:'#BDE7F5', icon:'star',     progress: s => [TIQO_CONFIG.islands.filter(i => s.perIsland[i.id].done > 0).length, TIQO_CONFIG.islands.length] },
     { id:'harian',   name:'Rajin Bertualang',  desc:'Selesaikan 3 Misi Hari Ini.',               color:'#FFE08A', icon:'star',     progress: s => [Math.min(s.dailyCount, 3), 3] },
@@ -2190,7 +2494,7 @@ const Engine = (() => {
     }
 
     function header(r) {
-      return `<div class="instr"><div class="m">${Art.mascot(r.kind === 'memory' ? 'penasaran' : r.kind === 'trace' ? 'semangat' : 'senang')}</div><div class="bubble">${U.esc(r.say)}</div></div>
+      return `<div class="instr"><div class="m">${Art.mascot(r.kind === 'memory' ? 'penasaran' : r.kind === 'trace' ? 'semangat' : r.kind === 'code' ? 'penasaran' : 'senang')}</div><div class="bubble">${U.esc(r.say)}</div></div>
               ${r.prompt ? `<div class="prompt">${r.prompt}</div>` : ''}`;
     }
 
@@ -2202,7 +2506,7 @@ const Engine = (() => {
       const r = rounds[i];
       body.innerHTML = header(r);
       body.style.animation = 'none'; void body.offsetWidth; body.style.animation = 'fadeUp .3s ease both';
-      ({ choice: doChoice, order: doOrder, findAll: doFind, memory: doMemory, trace: doTrace })[r.kind](r);
+      ({ choice: doChoice, order: doOrder, findAll: doFind, memory: doMemory, trace: doTrace, code: doCode })[r.kind](r);
       later(() => Sound.say(r.say), 250);
       // Fitur bantu hitung: sentuh benda untuk memberi nomor
       let cnt = 0;
@@ -2327,6 +2631,17 @@ const Engine = (() => {
         onOff: () => showTry(r.hint, ['Ups, keluar jalur. Ayo coba lagi!', 'Pelan-pelan saja, kamu pasti bisa!', 'Sedikit lagi, ikuti titiknya ya!']),
         onPart: () => Sound.play('star'),
         onDone: (score, pad) => { Sound.play('star'); burst(pad); later(() => done(score, null, r.reveal), 650); }
+      });
+      disposers.push(w.destroy);
+    }
+
+    /* ---- Pulau Kode ---- */
+    function doCode(r) {
+      const host = U.h('<div class="code-host"></div>');
+      body.appendChild(host);
+      const w = Code.mount(host, r, {
+        onFail: msg => showTry(r.hint, [msg]),
+        onDone: (score, board) => { Sound.play('star'); burst(board); later(() => done(score, 'Hebat! Kodemu berhasil!', ''), 700); }
       });
       disposers.push(w.destroy);
     }

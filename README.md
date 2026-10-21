@@ -1,6 +1,6 @@
 # TIQO — Bermain, Belajar, Bertualang
 
-PWA permainan edukasi untuk anak usia 4–6 tahun. Versi 1.2.0.
+PWA permainan edukasi untuk anak usia 4–6 tahun. Versi 1.3.0.
 
 ## Isi folder
 
@@ -28,11 +28,13 @@ Semua berkas harus berada di **folder yang sama** (akar repositori).
 - Layar pembuka dengan logo resmi, nama sekolah (dapat diubah/dimatikan).
 - Beranda: Misi Hari Ini (dipilih otomatis per anak per hari), 5 pulau, ringkasan bintang.
 - Peta Kepulauan Ajaib dan halaman tiap pulau.
-- 46 misi di 5 pulau: Huruf (10), Angka (12), Taman Warna (7), Logika (8), Hijaiyah (9).
+- 52 misi di 6 pulau: Huruf (10), Angka (12), Taman Warna (7), Logika (8), Kode (6), Hijaiyah (9).
+- Pulau Kode (baru di v1.3.0): menyusun kartu panah agar bintang sampai ke portal — langkah pertama,
+  urutan langkah, menghindari batu, memperbaiki kode (debugging), dan perulangan ×2/×3.
 - Jenis permainan: pilihan ganda, mengurutkan, temukan semua, kartu memori, bantu hitung,
   dan menebalkan dengan jari (A–Z, 0–9, hijaiyah) — baru di v1.1.0.
 - Suara pemandu otomatis (bahasa Indonesia, dari perangkat) + efek suara lembut.
-- Bintang 1–3 per misi, 12 hadiah di Galeri Bintang.
+- Bintang 1–3 per misi, 13 hadiah di Galeri Bintang.
 - Beberapa profil anak dengan progres terpisah (tanpa email/kata sandi).
 - Area Orang Tua dengan gerbang (soal hitungan + tahan tombol): progres, waktu bermain, suara,
   sekolah, profil, unduh/pulihkan cadangan, hapus data.
@@ -42,7 +44,7 @@ Semua berkas harus berada di **folder yang sama** (akar repositori).
 
 ## Struktur kode di dalam index.html
 
-Kode disusun per bagian bernomor: 1 Konfigurasi · 2 Bank konten · 3 Utilitas · 4 Ilustrasi · 4b Menebalkan ·
+Kode disusun per bagian bernomor: 1 Konfigurasi · 2 Bank konten · 3 Utilitas · 4 Ilustrasi · 4b Menebalkan · 4c Pulau Kode ·
 5 Misi (generator + katalog) · 6 Penyimpanan · 7 Suara · 8 Bintang & hadiah · 8b Waktu bermain · 9 Mesin permainan ·
 10 Layar · 11 Area orang tua · 12 Rute & start.
 
@@ -58,6 +60,7 @@ Kode disusun per bagian bernomor: 1 Konfigurasi · 2 Bank konten · 3 Utilitas �
 
 ## Riwayat versi
 
+- **1.3.0** — Pulau Kode: 6 misi coding untuk anak + hadiah Ahli Kode.
 - **1.2.0** — Pengatur waktu bermain & jam tidur di Area Orang Tua.
 - **1.1.0** — Permainan menebalkan dengan jari: huruf A–Z, angka 0–9, huruf hijaiyah (8 misi baru).
 - **1.0.1** — Identitas pengembang IdeA1 + kontak WhatsApp di Tentang TIQO.
