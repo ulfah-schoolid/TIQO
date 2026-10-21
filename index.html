@@ -542,11 +542,14 @@ h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.
   .code-board{grid-row:1/4}
 }
 
+/* Pulau Bahasa: kata Inggris pada kartu memori */
+.mcard .etxt{font-family:var(--font-display);font-weight:600;font-size:clamp(15px,4.6vw,22px);color:var(--primary);line-height:1.1;text-align:center;word-break:keep-all}
+
 </style>
 </head>
 <body>
 <!--
-  TIQO v1.3.0 — PWA permainan edukasi anak 4–6 tahun.
+  TIQO v1.4.0 — PWA permainan edukasi anak 4–6 tahun.
   Satu berkas ini sudah lengkap (gaya, gambar, dan kode).
   Berkas pendukung opsional di folder yang sama: manifest.json, sw.js, icon-*.png
   (dibutuhkan agar aplikasi bisa dipasang di layar utama dan dibuka offline).
@@ -583,7 +586,7 @@ const ASSETS = { logo: "data:image/webp;base64,UklGRgqSAABXRUJQVlA4WAoAAAAQAAAAa
 const TIQO_CONFIG = Object.freeze({
   appName: 'TIQO',
   tagline: 'Bermain, Belajar, Bertualang',
-  version: '1.3.0',
+  version: '1.4.0',
   // Identitas pengembang (tampil di Area Orang Tua → Tentang TIQO)
   developer: { name: 'IdeA1', wa: '08566776888' },
   // Nilai awal kartu sekolah. Orang tua dapat mengubah, menyalakan,
@@ -608,6 +611,8 @@ const TIQO_CONFIG = Object.freeze({
       bg:'#F4F0FD', band:'#E8E0FA', edge:'#C3B2EE', grass:'#D2C5F5' },
     { id:'kode',     name:'Pulau Kode',     short:'Kode',     goal:'Menyusun langkah dan perintah untuk melatih logika berpikir.',
       bg:'#EDF3FE', band:'#D3E3FB', edge:'#A5C2EF', grass:'#BCD3F6' },
+    { id:'bahasa',   name:'Pulau Bahasa',   short:'Bahasa',   goal:'Mengenal kosakata dan sapaan bahasa Inggris lewat mendengar dan bermain.',
+      bg:'#FEF1F4', band:'#FAD9E2', edge:'#EFABBE', grass:'#F7C2D0' },
     { id:'hijaiyah', name:'Pulau Hijaiyah', short:'Hijaiyah', goal:'Mengenal dan menebalkan huruf hijaiyah, serta ucapan baik sehari-hari.',
       bg:'#E9F6F5', band:'#CDEDEA', edge:'#93D3CC', grass:'#A9E2D6' }
   ]
@@ -730,7 +735,31 @@ const CONTENT = (() => {
     {id:'masuk', text:"Assalamu'alaikum", ic:'🏠', situasi:'Masuk ke rumah, kita mengucapkan apa?', same:'salam'}
   ];
 
-  return { WORDS, NUM_WORDS, COUNT_OBJS, COLORS, COLOR_OBJECTS, SHAPES, CATEGORIES, PICS, PATTERN_SETS, HIJAIYAH, UCAPAN,
+  // Kosakata bahasa Inggris untuk Pulau Bahasa: [Inggris, emoji, arti Indonesia]
+  const EN = {
+    animals: [['Cat','🐱','kucing'],['Dog','🐶','anjing'],['Bird','🐦','burung'],['Fish','🐟','ikan'],['Cow','🐄','sapi'],
+      ['Duck','🦆','bebek'],['Rabbit','🐰','kelinci'],['Elephant','🐘','gajah'],['Horse','🐴','kuda'],['Chicken','🐔','ayam'],
+      ['Monkey','🐒','monyet'],['Butterfly','🦋','kupu-kupu']],
+    fruits: [['Apple','🍎','apel'],['Banana','🍌','pisang'],['Grapes','🍇','anggur'],['Watermelon','🍉','semangka'],
+      ['Strawberry','🍓','stroberi'],['Pineapple','🍍','nanas'],['Lemon','🍋','lemon'],['Mango','🥭','mangga']],
+    things: [['Ball','⚽','bola'],['Book','📖','buku'],['Car','🚗','mobil'],['House','🏠','rumah'],['Sun','☀️','matahari'],
+      ['Moon','🌙','bulan'],['Star','⭐','bintang'],['Flower','🌸','bunga'],['Bag','🎒','tas'],['Shoes','👟','sepatu']]
+  };
+  Object.keys(EN).forEach(k => EN[k] = EN[k].map(([en, emo, id]) => ({ en, emo, id, group: k })));
+  const EN_NUMS = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'];
+  const EN_COLORS = { merah:'Red', kuning:'Yellow', hijau:'Green', biru:'Blue', oranye:'Orange', ungu:'Purple', merahmuda:'Pink', cokelat:'Brown' };
+  // Sapaan: situasi (Indonesia), ungkapan Inggris, arti, emoji
+  const GREETINGS = [
+    { en:'Hello', id:'Halo', ic:'👋', situasi:'Bertemu teman, kita menyapa dengan apa?' },
+    { en:'Good morning', id:'Selamat pagi', ic:'🌅', situasi:'Matahari terbit. Kita menyapa dengan apa?' },
+    { en:'Good night', id:'Selamat malam', ic:'🌙', situasi:'Mau tidur. Kita mengucapkan apa?' },
+    { en:'Thank you', id:'Terima kasih', ic:'🎁', situasi:'Diberi hadiah oleh teman. Kita mengucapkan apa?' },
+    { en:'Goodbye', id:'Sampai jumpa', ic:'🚪', situasi:'Mau pulang dan berpisah. Kita mengucapkan apa?' },
+    { en:'Sorry', id:'Maaf', ic:'😔', situasi:'Kita berbuat salah. Kita mengucapkan apa?' },
+    { en:'Please', id:'Tolong', ic:'🙏', situasi:'Minta tolong dengan sopan. Kita mengucapkan apa?' }
+  ];
+
+  return { EN, EN_NUMS, EN_COLORS, GREETINGS, WORDS, NUM_WORDS, COUNT_OBJS, COLORS, COLOR_OBJECTS, SHAPES, CATEGORIES, PICS, PATTERN_SETS, HIJAIYAH, UCAPAN,
     colorById: id => COLORS.find(c => c.id === id),
     shapeById: id => SHAPES.find(s => s.id === id) };
 })();
@@ -743,6 +772,8 @@ const U = {
   $$: (s, r = document) => Array.from(r.querySelectorAll(s)),
   h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; },
   esc: s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
+  // Tanda [[en:Kata]] menandai kata bahasa Inggris (dibaca dengan suara Inggris). Untuk tampilan, tanda dibuang.
+  plain: s => String(s ?? '').replace(/\[\[en:([^\]]+)\]\]/g, '$1'),
   ri: (a, b) => a + Math.floor(Math.random() * (b - a + 1)),
   pick: arr => arr[Math.floor(Math.random() * arr.length)],
   shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; },
@@ -915,6 +946,11 @@ const Art = (() => {
       <rect x="10" y="54" width="36" height="36" rx="9" fill="#8ED8C6" stroke="#3E9E87" stroke-width="2.5"/>
       <path d="M38 72 H20 M27 64 L19 72 L27 80" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
       <polygon points="${starPts(72, 73, 17, 8)}" fill="#FFD66B" stroke="#C9971B" stroke-width="2.5"/></g>`,
+    bahasa: `<g stroke-linejoin="round">
+      <path d="M10 14 h50 a8 8 0 0 1 8 8 v22 a8 8 0 0 1 -8 8 h-26 l-14 12 v-12 h-10 a8 8 0 0 1 -8 -8 v-22 a8 8 0 0 1 8 -8z" fill="#9ED3F3" stroke="#2F7DB8" stroke-width="2.5"/>
+      <text x="38" y="35" text-anchor="middle" dominant-baseline="central" font-family="Fredoka,Nunito,sans-serif" font-weight="700" font-size="24" fill="#fff">Hi!</text>
+      <path d="M90 44 h-44 a8 8 0 0 0 -8 8 v18 a8 8 0 0 0 8 8 h6 v12 l14 -12 h24 a8 8 0 0 0 8 -8 v-18 a8 8 0 0 0 -8 -8z" fill="#FFD66B" stroke="#C9971B" stroke-width="2.5" transform="translate(0 0)"/>
+      <polygon points="${starPts(68, 66, 13, 6)}" fill="#fff"/></g>`,
     hijaiyah: `<path d="M74 10 a18 18 0 1 0 14 30 a14 14 0 1 1 -14 -30z" fill="#FFD66B" stroke="#C9971B" stroke-width="2"/>
       <polygon points="${starPts(84, 14, 5, 2.4)}" fill="#FFD66B"/>
       <rect x="10" y="44" width="80" height="44" rx="12" fill="#8ED8C6" stroke="#3E9E87" stroke-width="2.5"/>
@@ -1493,6 +1529,7 @@ const Gen = (() => {
   const C = CONTENT, { pick, sample, shuffle, targets, ri } = U;
   const ALPHA = 'ABCDEFGHIJKLMNOPRSTUWZ'.split(''); // tanpa Q,V,X,Y yang jarang dipakai anak
   const NUM = n => C.NUM_WORDS[n] || String(n);
+  const enPool = k => k === 'all' ? Object.values(C.EN).flat() : k.split('+').flatMap(x => C.EN[x]);
 
   // ---- Potongan tampilan prompt ----
   const P = {
@@ -1508,6 +1545,7 @@ const Gen = (() => {
     emo: (e, correct, cap = '') => ({ html: `<span class="emo">${e}</span>${cap ? `<span class="cap">${U.esc(cap)}</span>` : ''}`, correct, name: cap || e }),
     color: (c, correct) => ({ html: Art.swatch(c.hex), correct, name: c.name, reveal: c.name }),
     shape: (sid, col, correct) => ({ html: Art.shape(sid, col), correct, name: C.shapeById(sid).name, reveal: C.shapeById(sid).name }),
+    word: (txt, correct) => ({ html: `<span class="text">${U.esc(txt)}</span>`, correct, name: txt, cls: 'text-opt' }),
     text: (txt, ic, correct) => ({ html: `<span class="ic">${ic}</span><span class="text">${U.esc(txt)}</span>`, correct, name: txt, cls: 'text-opt' })
   };
   const choice = (o) => ({ kind: 'choice', cols: o.options.length === 4 ? 2 : o.options.length, ...o, options: shuffle(o.options) });
@@ -1794,12 +1832,92 @@ const Gen = (() => {
       } else if (set === 'hijaiyah') {
         const hs = sample(C.HIJAIYAH, pairs);
         cards = hs.flatMap(h => [0, 1].map(() => ({ key: h.ch, html: `<span class="glyph arab" lang="ar">${h.ch}</span>` })));
+      } else if (set === 'en') {
+        const ws = sample(enPool('animals+fruits').filter(w => w.en.length <= 7), pairs);
+        cards = ws.flatMap(w => [
+          { key: 'en:' + w.en, html: `<span class="emo">${w.emo}</span>`, voice: `[[en:${w.en}]]` },
+          { key: 'en:' + w.en, html: `<span class="etxt">${w.en}</span>`, voice: `[[en:${w.en}]]` }]);
       } else {
         const ps = sample(C.PICS, pairs);
         cards = ps.flatMap(p => [0, 1].map(() => ({ key: p, html: `<span class="emo">${p}</span>` })));
       }
-      const say = set === 'case' ? 'Buka kartunya. Cari pasangan huruf besar dan huruf kecil!' : 'Buka dua kartu. Cari gambar yang sama!';
+      const say = set === 'case' ? 'Buka kartunya. Cari pasangan huruf besar dan huruf kecil!' : set === 'en' ? 'Buka dua kartu. Cocokkan gambar dengan katanya!' : 'Buka dua kartu. Cari gambar yang sama!';
       return [{ kind: 'memory', say, hint: 'Ingat-ingat letak kartunya, ya.', cols: pairs <= 3 ? 3 : (pairs <= 4 ? 4 : 4), cards: shuffle(cards) }];
+    },
+
+    /* ---------------- BAHASA INGGRIS ---------------- */
+    engHear({ pool = 'animals', n = 3 }, rounds) {
+      const set = enPool(pool);
+      return targets(set, rounds).map(w => {
+        const ds = sample(set.filter(x => x.en !== w.en && x.emo !== w.emo), n - 1);
+        return choice({
+          say: 'Dengarkan, lalu sentuh gambarnya!',
+          voice: `Dengarkan. [[en:${w.en}]]. Sentuh gambar [[en:${w.en}]]!`,
+          prompt: P.listen('Dengarkan, lalu sentuh gambarnya'),
+          hint: 'Tekan tombol suara untuk mendengarkan lagi.',
+          reveal: `[[en:${w.en}]] artinya ${w.id}`,
+          options: [opt.emo(w.emo, true), ...ds.map(d => opt.emo(d.emo, false))]
+        });
+      });
+    },
+    engSee({ pool = 'animals+fruits', n = 3 }, rounds) {
+      const set = enPool(pool);
+      return targets(set, rounds).map(w => {
+        const ds = sample(set.filter(x => x.en !== w.en && x.emo !== w.emo), n - 1);
+        const opts = shuffle([opt.word(w.en, true), ...ds.map(d => opt.word(d.en, false))]);
+        return {
+          kind: 'choice', cols: 1,
+          say: 'Ini gambar apa dalam bahasa Inggris?',
+          voice: `Ini gambar apa dalam bahasa Inggris? ${opts.map(o => `[[en:${o.name}]]`).join(', ')}?`,
+          prompt: P.emoji(w.emo),
+          hint: 'Tekan tombol suara untuk mendengarkan pilihannya lagi.',
+          reveal: `[[en:${w.en}]] artinya ${w.id}`,
+          options: opts
+        };
+      });
+    },
+    engColor({ n = 3, pool = 6 }, rounds) {
+      const set = C.COLORS.slice(0, pool);
+      return targets(set, rounds).map(c => {
+        const en = C.EN_COLORS[c.id], ds = sample(set.filter(x => x.id !== c.id), n - 1);
+        return choice({
+          say: 'Dengarkan, lalu sentuh warnanya!',
+          voice: `Dengarkan. [[en:${en}]]. Sentuh warna [[en:${en}]]!`,
+          prompt: P.listen('Dengarkan, lalu sentuh warnanya'),
+          hint: 'Tekan tombol suara untuk mendengarkan lagi.',
+          reveal: `[[en:${en}]] artinya ${c.name}`,
+          options: [opt.color(c, true), ...ds.map(d => opt.color(d, false))]
+        });
+      });
+    },
+    engNumber({ min = 1, max = 5, n = 3 }, rounds) {
+      const set = Array.from({ length: max - min + 1 }, (_, i) => i + min);
+      return targets(set, rounds).map(k => {
+        const en = C.EN_NUMS[k], ds = sample(set.filter(x => x !== k), n - 1);
+        return choice({
+          say: 'Dengarkan, lalu sentuh angkanya!',
+          voice: `Dengarkan. [[en:${en}]]. Sentuh angka [[en:${en}]]!`,
+          prompt: P.listen('Dengarkan, lalu sentuh angkanya'),
+          hint: 'Tekan tombol suara untuk mendengarkan lagi.',
+          reveal: `[[en:${en}]] artinya ${NUM(k)}`,
+          options: [opt.glyph(String(k), true), ...ds.map(x => opt.glyph(String(x), false))]
+        });
+      });
+    },
+    engGreet({ n = 3 }, rounds) {
+      return sample(C.GREETINGS, rounds).map(g => {
+        const ds = sample(C.GREETINGS.filter(x => x.en !== g.en), n - 1);
+        const opts = shuffle([g, ...ds]).map(x => opt.text(x.en, '🔊', x === g));
+        return {
+          kind: 'choice', cols: 1,
+          say: g.situasi,
+          voice: `${g.situasi} ${opts.map(o => `[[en:${o.name}]]`).join(', atau ')}?`,
+          prompt: P.emoji(g.ic, `<span class="word" style="font-size:19px;text-align:center;max-width:280px">${U.esc(g.situasi)}</span>`),
+          hint: 'Tekan tombol suara untuk mendengarkan pilihannya lagi.',
+          reveal: `[[en:${g.en}]] artinya ${g.id}`,
+          options: opts
+        };
+      });
     },
 
     /* ---------------- KODE ---------------- */
@@ -1937,6 +2055,15 @@ const MISSIONS = [
   { id:'kode-4', island:'kode', title:'Perbaiki Kode',    goal:'Menemukan dan memperbaiki langkah yang salah', level:2, gen:'code', params:{mode:'fix', size:4, len:[3,4], rocks:[1,2]}, rounds:3 },
   { id:'kode-5', island:'kode', title:'Kode Ulangi',      goal:'Mengenal perulangan ×2 dan ×3',               level:2, gen:'code', params:{mode:'loop', size:5, segs:2}, rounds:3 },
   { id:'kode-6', island:'kode', title:'Ulangi Hebat',     goal:'Memakai perulangan untuk jalan berbelok',     level:2, gen:'code', params:{mode:'loop', size:5, segs:3}, rounds:3 },
+  // Pulau Bahasa (bahasa Inggris)
+  { id:'bahasa-1', island:'bahasa', title:'Hewan: Cat, Dog',     goal:'Mengenal nama hewan dalam bahasa Inggris', level:1, gen:'engHear',  params:{pool:'animals', n:3}, rounds:5 },
+  { id:'bahasa-2', island:'bahasa', title:'Buah: Apple, Banana', goal:'Mengenal nama buah dalam bahasa Inggris',  level:1, gen:'engHear',  params:{pool:'fruits', n:3}, rounds:5 },
+  { id:'bahasa-3', island:'bahasa', title:'Warna: Red, Blue',    goal:'Mengenal nama warna dalam bahasa Inggris', level:1, gen:'engColor', params:{n:3, pool:6}, rounds:5 },
+  { id:'bahasa-4', island:'bahasa', title:'Angka: One, Two',     goal:'Mengenal angka 1–5 dalam bahasa Inggris',  level:1, gen:'engNumber',params:{min:1, max:5, n:3}, rounds:5 },
+  { id:'bahasa-5', island:'bahasa', title:'Benda Sekitarku',     goal:'Mengenal nama benda dalam bahasa Inggris', level:1, gen:'engHear',  params:{pool:'things', n:3}, rounds:5 },
+  { id:'bahasa-6', island:'bahasa', title:'Kata Apa Ini?',       goal:'Memilih kata Inggris yang cocok dengan gambar', level:2, gen:'engSee', params:{pool:'animals+fruits', n:3}, rounds:5 },
+  { id:'bahasa-7', island:'bahasa', title:'Kartu Kata Kembar',   goal:'Mencocokkan gambar dengan kata Inggris',   level:2, gen:'memory',   params:{pairs:4, set:'en'}, rounds:1 },
+  { id:'bahasa-8', island:'bahasa', title:'Hello! Thank you!',   goal:'Mengenal sapaan dan ucapan sehari-hari',   level:2, gen:'engGreet', params:{n:3}, rounds:5 },
   // Pulau Hijaiyah
   { id:'hijaiyah-1',island:'hijaiyah',title:'Alif sampai Kho', goal:'Mengenal huruf hijaiyah ا–خ',           level:1, gen:'pickHijaiyah', params:{from:0,to:6,n:3,mode:'see'}, rounds:5 },
   { id:'hijaiyah-2',island:'hijaiyah',title:'Dal sampai Dhod', goal:'Mengenal huruf hijaiyah د–ض',           level:1, gen:'pickHijaiyah', params:{from:7,to:14,n:3,mode:'see'}, rounds:5 },
@@ -2162,12 +2289,24 @@ const Store = (() => {
 const AUDIO_CLIPS = {};
 const Sound = (() => {
   const synth = window.speechSynthesis;
-  let voice = null, ctx = null, clip = null;
+  let voice = null, enVoice = null, ctx = null, clip = null;
   function pickVoice() {
     if (!synth) return;
     const vs = synth.getVoices();
     voice = vs.find(v => /^id[-_]ID/i.test(v.lang) && /female|wanita|gadis|damayanti/i.test(v.name))
          || vs.find(v => /^id[-_]ID/i.test(v.lang)) || vs.find(v => /^id/i.test(v.lang)) || null;
+    enVoice = vs.find(v => /^en[-_]US/i.test(v.lang) && /female|samantha|zira|aria|jenny/i.test(v.name))
+         || vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+  }
+  // Pecah kalimat menjadi bagian Indonesia dan Inggris. Kata Inggris ditandai [[en:Kata]].
+  function segments(text) {
+    const out = [], re = /\[\[en:([^\]]+)\]\]/g; let last = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) out.push({ t: text.slice(last, m.index), en: false });
+      out.push({ t: m[1], en: true }); last = re.lastIndex;
+    }
+    if (last < text.length) out.push({ t: text.slice(last), en: false });
+    return out.filter(s => s.t.replace(/[\s.,!?]/g, ''));
   }
   if (synth) { pickVoice(); try { synth.addEventListener('voiceschanged', pickVoice); } catch (e) { synth.onvoiceschanged = pickVoice; } }
 
@@ -2180,12 +2319,15 @@ const Sound = (() => {
     stop();
     if (AUDIO_CLIPS[text]) { clip = new Audio(AUDIO_CLIPS[text]); clip.play().catch(() => {}); return; }
     if (!synth) return;
-    const clean = text.replace(/[⭐🔊]/g, '').replace(/'/g, '');
-    const u = new SpeechSynthesisUtterance(clean);
-    u.lang = 'id-ID'; if (voice) u.voice = voice;
-    u.rate = Store.settings.rate === 'lambat' ? 0.78 : 0.92; u.pitch = 1.12;
+    const slow = Store.settings.rate === 'lambat';
+    const list = segments(text).map(s => {
+      const u = new SpeechSynthesisUtterance(s.t.replace(/[⭐🔊]/g, '').replace(/'/g, ''));
+      if (s.en) { u.lang = 'en-US'; if (enVoice) u.voice = enVoice; u.rate = slow ? 0.7 : 0.8; u.pitch = 1.1; }
+      else { u.lang = 'id-ID'; if (voice) u.voice = voice; u.rate = slow ? 0.78 : 0.92; u.pitch = 1.12; }
+      return u;
+    });
     // Beberapa browser Android butuh jeda kecil setelah cancel()
-    setTimeout(() => { try { synth.speak(u); } catch (e) {} }, 60);
+    setTimeout(() => { try { list.forEach(u => synth.speak(u)); } catch (e) {} }, 60);
   }
 
   // ---- Efek suara lembut ----
@@ -2213,7 +2355,7 @@ const Sound = (() => {
   // Buka kunci audio pada sentuhan pertama (aturan browser HP)
   function unlock() { if (Store.settings.sfx) ac(); }
 
-  return { say, stop, play, unlock, hasVoice: () => !!voice, supported: !!synth };
+  return { say, stop, play, unlock, hasVoice: () => !!voice, hasEnglish: () => !!enVoice, supported: !!synth };
 })();
 
 /* =========================================================
@@ -2252,6 +2394,7 @@ const Rewards = (() => {
     { id:'warna',    name:'Ahli Warna',        desc:'Selesaikan semua misi Taman Warna.',        color:'#DDF1D8', icon:'warna',    progress: s => [s.perIsland.warna.done, s.perIsland.warna.total] },
     { id:'logika',   name:'Penemu Pola',       desc:'Selesaikan semua misi Pulau Logika.',       color:'#E8E0FA', icon:'logika',   progress: s => [s.perIsland.logika.done, s.perIsland.logika.total] },
     { id:'kode',     name:'Ahli Kode',         desc:'Selesaikan semua misi Pulau Kode.',         color:'#D3E3FB', icon:'kode',     progress: s => [s.perIsland.kode.done, s.perIsland.kode.total] },
+    { id:'bahasa',   name:'Jago Bahasa',       desc:'Selesaikan semua misi Pulau Bahasa.',       color:'#FAD9E2', icon:'bahasa',   progress: s => [s.perIsland.bahasa.done, s.perIsland.bahasa.total] },
     { id:'hijaiyah', name:'Sahabat Hijaiyah',  desc:'Selesaikan semua misi Pulau Hijaiyah.',     color:'#CDEDEA', icon:'hijaiyah', progress: s => [s.perIsland.hijaiyah.done, s.perIsland.hijaiyah.total] },
     { id:'pulau',    name:'Penjelajah Pulau',  desc:'Mainkan minimal 1 misi di setiap pulau.',   color:'#BDE7F5', icon:'star',     progress: s => [TIQO_CONFIG.islands.filter(i => s.perIsland[i.id].done > 0).length, TIQO_CONFIG.islands.length] },
     { id:'harian',   name:'Rajin Bertualang',  desc:'Selesaikan 3 Misi Hari Ini.',               color:'#FFE08A', icon:'star',     progress: s => [Math.min(s.dailyCount, 3), 3] },
@@ -2442,11 +2585,12 @@ const Engine = (() => {
         <div class="play-body"></div>
       </div>
       <div class="fb" role="status" aria-live="polite"></div>`;
+    const spoken = r => r.voice || r.say;
     const body = U.$('.play-body', root), fb = U.$('.fb', root), bars = U.$$('.progress i', root);
 
     root.addEventListener('click', e => {
       const b = e.target.closest('[data-act]'); if (!b) return;
-      if (b.dataset.act === 'say') { Sound.say(rounds[i].say); }
+      if (b.dataset.act === 'say') { Sound.say(spoken(rounds[i])); }
       if (b.dataset.act === 'exit') confirmExit();
     });
 
@@ -2463,7 +2607,7 @@ const Engine = (() => {
       Sound.play('right'); U.vibrate(25);
       fb.className = 'fb ok';
       fb.innerHTML = `<div class="m">${Art.mascot(Math.random() < .5 ? 'semangat' : 'kedip')}</div>
-        <div class="txt"><b>${U.esc(text)}</b>${sub ? `<span>${U.esc(sub)}</span>` : ''}</div>
+        <div class="txt"><b>${U.esc(U.plain(text))}</b>${sub ? `<span>${U.esc(U.plain(sub))}</span>` : ''}</div>
         <button class="btn btn-ok" data-next>Lanjut ${Art.I.next}</button>`;
       requestAnimationFrame(() => fb.classList.add('show'));
       Sound.say(text + (sub ? '. ' + sub : ''));
@@ -2476,7 +2620,7 @@ const Engine = (() => {
       Sound.play('soft');
       fb.className = 'fb try';
       const line = U.pick(lines || RETRY);
-      fb.innerHTML = `<div class="m">${Art.mascot('berpikir')}</div><div class="txt"><b>${U.esc(line)}</b><span>${U.esc(hint || '')}</span></div>`;
+      fb.innerHTML = `<div class="m">${Art.mascot('berpikir')}</div><div class="txt"><b>${U.esc(U.plain(line))}</b><span>${U.esc(U.plain(hint || ''))}</span></div>`;
       requestAnimationFrame(() => fb.classList.add('show'));
       Sound.say(line + ' ' + (hint || ''));
       clearTimeout(tryT); tryT = later(hideFb, 2600);
@@ -2494,7 +2638,7 @@ const Engine = (() => {
     }
 
     function header(r) {
-      return `<div class="instr"><div class="m">${Art.mascot(r.kind === 'memory' ? 'penasaran' : r.kind === 'trace' ? 'semangat' : r.kind === 'code' ? 'penasaran' : 'senang')}</div><div class="bubble">${U.esc(r.say)}</div></div>
+      return `<div class="instr"><div class="m">${Art.mascot(r.kind === 'memory' ? 'penasaran' : r.kind === 'trace' ? 'semangat' : r.kind === 'code' ? 'penasaran' : 'senang')}</div><div class="bubble">${U.esc(U.plain(r.say))}</div></div>
               ${r.prompt ? `<div class="prompt">${r.prompt}</div>` : ''}`;
     }
 
@@ -2507,7 +2651,7 @@ const Engine = (() => {
       body.innerHTML = header(r);
       body.style.animation = 'none'; void body.offsetWidth; body.style.animation = 'fadeUp .3s ease both';
       ({ choice: doChoice, order: doOrder, findAll: doFind, memory: doMemory, trace: doTrace, code: doCode })[r.kind](r);
-      later(() => Sound.say(r.say), 250);
+      later(() => Sound.say(spoken(r)), 250);
       // Fitur bantu hitung: sentuh benda untuk memberi nomor
       let cnt = 0;
       U.$$('[data-count]', body).forEach(b => b.addEventListener('click', () => {
@@ -2602,7 +2746,7 @@ const Engine = (() => {
         const b = U.h(`<button class="mcard" aria-label="Kartu ${k + 1}"><span class="inner"><span class="face back"><img src="${ASSETS.q}" alt=""></span><span class="face front">${c.html}</span></span></button>`);
         b.onclick = () => {
           if (busy || b.classList.contains('open') || b.classList.contains('matched')) return;
-          b.classList.add('open'); Sound.play('flip'); open.push({ b, c });
+          b.classList.add('open'); Sound.play('flip'); if (c.voice) Sound.say(c.voice); open.push({ b, c });
           if (open.length === 2) {
             busy = true;
             const [x, y] = open;
